@@ -1,0 +1,69 @@
+/* Base Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow-x: hidden;
+}
+
+/* --- HERO CANVAS SECTION --- */
+.hero-canvas {
+    position: relative;
+    width: 100vw;
+    height: 100vh; /* Locks this section to exactly one screen height */
+    display: flex;
+    align-items: flex-end; /* Pushes the scroll indicator to the bottom */
+    justify-content: center;
+    padding-bottom: 3rem;
+}
+
+#unicorn-bg-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0; /* Keeps the canvas as the background layer */
+}
+
+.scroll-indicator {
+    position: relative;
+    z-index: 1;
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.5;
+    pointer-events: none; /* Crucial: allows the mouse to interact with the canvas behind the text */
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+}
+
+/* --- PORTFOLIO CONTENT SECTION --- */
+.portfolio-content {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    background-color: #0a0a0a; /* Slightly lighter than pure black for depth */
+    padding: 6rem 10%;
+}
+
+.portfolio-content h1 {
+    font-size: 3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.portfolio-content p {
+    color: #a0a0a0;
+    font-size: 1.2rem;
+}
