@@ -5,7 +5,7 @@ import { CardScene } from './CardScene'
 export function HomePage() {
   return (
     <>
-      <SceneCanvasLayout>
+      <SceneCanvasLayout camera={{ position: [0, 0, 100], fov: 15 }}>
         <CardScene />
       </SceneCanvasLayout>
       <HeroText />
