@@ -75,10 +75,14 @@ export function Card({ data, position, rotationY, hoverLift = 0.6, floatOffset =
           onPointerOut={onPointerOut}
           onClick={onClick}
         >
-          <meshStandardMaterial
+          <meshPhysicalMaterial
             color={hovered ? '#ffffff' : '#e8e8ec'}
-            roughness={0.3}
+            roughness={0.25}
             metalness={0.05}
+            clearcoat={0.6}
+            clearcoatRoughness={0.3}
+            emissive={data.accent}
+            emissiveIntensity={hovered ? 0.25 : 0}
           />
         </RoundedBox>
         <Text
