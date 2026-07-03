@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import type { ThreeEvent } from '@react-three/fiber'
-import { Image, Environment, ScrollControls, useScroll, useTexture } from '@react-three/drei'
+import { Image, Text, Environment, ScrollControls, useScroll, useTexture } from '@react-three/drei'
 import { useNavigate } from 'react-router-dom'
 import { easing } from 'maath'
 import { CARDS } from './cardData'
@@ -38,12 +38,15 @@ function Rig(props: { rotation: [number, number, number]; children: React.ReactN
   return <group ref={ref} {...props} />
 }
 
-function Carousel({ radius = 1.4, count = 8 }: { radius?: number; count?: number }) {
-  return Array.from({ length: count }, (_, i) => (
+// One card per section, titled accordingly (see cardData.ts).
+function Carousel({ radius = 1.1 }: { radius?: number }) {
+  const count = CARDS.length
+  return CARDS.map((card, i) => (
     <Card
-      key={i}
-      url={`/img${(i % 10) + 1}_.jpg`}
-      route={CARDS[i % CARDS.length].route}
+      key={card.id}
+      url={`/img${i + 1}_.jpg`}
+      label={card.label}
+      route={card.route}
       position={[
         Math.sin((i / count) * Math.PI * 2) * radius,
         0,
@@ -56,12 +59,13 @@ function Carousel({ radius = 1.4, count = 8 }: { radius?: number; count?: number
 
 interface CardProps {
   url: string
+  label: string
   route: string
   position: [number, number, number]
   rotation: [number, number, number]
 }
 
-function Card({ url, route, ...props }: CardProps) {
+function Card({ url, label, route, ...props }: CardProps) {
   const ref = useRef<THREE.Mesh>(null!)
   const [hovered, hover] = useState(false)
   const navigate = useNavigate()
@@ -95,6 +99,18 @@ function Card({ url, route, ...props }: CardProps) {
       {...props}
     >
       <bentPlaneGeometry args={[0.1, 1, 1, 20, 20]} />
+      {/* Cards face away (demo's PI flip) — mirror the label back toward the viewer. */}
+      <Text
+        position={[0, -0.64, -0.01]}
+        rotation={[0, Math.PI, 0]}
+        fontSize={0.085}
+        letterSpacing={0.02}
+        color="#111"
+        anchorX="center"
+        anchorY="top"
+      >
+        {label}
+      </Text>
     </Image>
   )
 }
