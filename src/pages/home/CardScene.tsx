@@ -1,3 +1,4 @@
+import { CameraRig } from '../../three/CameraRig'
 import { Card } from './Card'
 import { CARDS } from './cardData'
 
@@ -8,6 +9,7 @@ export function CardScene() {
   return (
     <>
       <color attach="background" args={['#0b0b0f']} />
+      <CameraRig />
       <ambientLight intensity={0.4} />
       <directionalLight position={[5, 6, 5]} intensity={1.2} />
       <directionalLight position={[-5, -2, -4]} intensity={0.3} color="#7dd3fc" />
