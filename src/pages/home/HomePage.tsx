@@ -1,15 +1,14 @@
-// DOM stub — replaced by the 3D card scene in the next step.
+import { SceneCanvasLayout } from '../../layout/SceneCanvasLayout'
+import { HeroText } from '../../components/ui/HeroText'
+import { CardScene } from './CardScene'
+
 export function HomePage() {
   return (
-    <main
-      style={{
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <h1>Rohan Jose — Designer</h1>
-    </main>
+    <>
+      <SceneCanvasLayout>
+        <CardScene />
+      </SceneCanvasLayout>
+      <HeroText />
+    </>
   )
 }
