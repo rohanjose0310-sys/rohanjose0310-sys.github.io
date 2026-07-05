@@ -5,7 +5,7 @@ import { CardScene } from './CardScene'
 export function HomePage() {
   return (
     <>
-      <SceneCanvasLayout camera={{ position: [0, 0, 100], fov: 15 }}>
+      <SceneCanvasLayout camera={{ position: [0, 0, 100], fov: 15 }} backdrop="#eef0f2">
         <CardScene />
       </SceneCanvasLayout>
       <HeroText />

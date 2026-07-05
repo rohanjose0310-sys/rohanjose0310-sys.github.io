@@ -3,7 +3,7 @@
   --text-h: #f3f4f6;
   --bg: #0b0b0f;
   --border: #2e303a;
-  --accent: #c084fc;
+  --accent: #aaff00;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -27,10 +27,10 @@ body,
   margin: 0;
 }
 
-/* Demo-faithful touches: soft canvas reveal + dot cursor (cards demo). */
+/* Demo-faithful touches: soft canvas reveal + neon-lime dot cursor. */
 body {
   cursor:
-    url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxMCIgZmlsbD0iI0U4QjA1OSIvPjwvc3ZnPg=='),
+    url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxMCIgZmlsbD0iI0FBRkYwMCIvPjwvc3ZnPg=='),
     auto;
 }
 

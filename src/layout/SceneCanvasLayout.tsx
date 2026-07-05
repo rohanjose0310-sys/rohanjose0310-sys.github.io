@@ -9,12 +9,15 @@ const DEFAULT_CAMERA: CameraProps = { position: [0, 0.4, 7], fov: 45 }
 export function SceneCanvasLayout({
   children,
   camera = DEFAULT_CAMERA,
+  backdrop,
 }: {
   children: ReactNode
   camera?: CameraProps
+  /** Page color behind the canvas — visible during the canvas fade-in. */
+  backdrop?: string
 }) {
   return (
-    <div style={{ position: 'fixed', inset: 0 }}>
+    <div style={{ position: 'fixed', inset: 0, background: backdrop }}>
       <Canvas
         dpr={[1, 2]}
         camera={camera}

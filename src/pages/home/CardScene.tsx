@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import type { ThreeEvent } from '@react-three/fiber'
-import { Image, Text, Environment, ScrollControls, useScroll, useTexture } from '@react-three/drei'
+import { Image, Text, ScrollControls, useScroll, useTexture } from '@react-three/drei'
 import { useNavigate } from 'react-router-dom'
 import { easing } from 'maath'
 import { CARDS } from './cardData'
@@ -14,14 +14,15 @@ import './util'
 export function CardScene() {
   return (
     <>
-      <fog attach="fog" args={['#a79', 8.5, 12]} />
+      {/* Sci-fi product-designer palette: white-grey studio backdrop. */}
+      <color attach="background" args={['#eef0f2']} />
+      <fog attach="fog" args={['#eef0f2', 8.5, 12]} />
       <ScrollControls pages={4} infinite>
         <Rig rotation={[0, 0, 0.15]}>
           <Carousel />
         </Rig>
         <Banner position={[0, -0.15, 0]} />
       </ScrollControls>
-      <Environment preset="dawn" background blur={0.5} />
     </>
   )
 }
