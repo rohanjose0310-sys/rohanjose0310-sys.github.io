@@ -9,6 +9,7 @@ import { Flare } from './prism/Flare'
 import { ProjectBox } from './prism/ProjectBox'
 import type { RayEvent, ReflectApi } from './prism/Reflect'
 import { calculateRefractionAngle, lerp, lerpV3 } from './prism/util'
+import { BackArrow } from './BackArrow'
 import { PROJECTS } from './projectData'
 
 import interFont from './assets/Inter_Bold.json?url'
@@ -69,16 +70,16 @@ export function PrismScene() {
 
   useFrame((state) => {
     if (!boxreflect.current || !rainbow.current || !spot.current || !ambient.current) return
-    // Tie the beam to the pointer. When the pointer sits on/near the prism
-    // the ray origin degenerates and the hit flickers every frame (strobe) —
-    // so the direction only follows the pointer while it's outside the
-    // prism's zone, and the origin never comes closer than that zone.
+    // The pointer steers the beam's direction; the beam itself always enters
+    // from beyond the screen edge. An origin tied to the pointer position
+    // (as in the demo) can sit inside the prism or a box, which makes the
+    // raycast flicker every frame — from outside the viewport it always
+    // sweeps cleanly across the scene and deflects off boxes in its path.
     const px = (state.pointer.x * state.viewport.width) / 2
     const py = (state.pointer.y * state.viewport.height) / 2
     const dist = Math.hypot(px, py)
-    const minDist = 2.2
-    if (dist > minDist) beamDir.set(px / dist, py / dist)
-    const reach = Math.max(dist, minDist)
+    if (dist > 0.5) beamDir.set(px / dist, py / dist)
+    const reach = Math.hypot(state.viewport.width, state.viewport.height) / 2 + 2
     boxreflect.current.setRay([beamDir.x * reach, beamDir.y * reach, 0], [0, 0, 0])
     // Animate rainbow intensity
     const material = rainbow.current.material as RainbowMaterialImpl
@@ -121,6 +122,8 @@ export function PrismScene() {
       {/* Rainbow and flares */}
       <Rainbow ref={rainbow} startRadius={0} endRadius={0.5} fade={0} />
       <Flare ref={flare} visible={isPrismHit} renderOrder={10} scale={1.25} streak={[12.5, 20, 1]} />
+      {/* Back-home arrow, revealed by light just like the caption */}
+      <BackArrow rainbow={rainbow} />
     </>
   )
 }

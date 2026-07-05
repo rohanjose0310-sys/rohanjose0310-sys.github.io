@@ -1,5 +1,4 @@
 import { Suspense } from 'react'
-import { Link } from 'react-router-dom'
 import { Canvas, useFrame, useLoader } from '@react-three/fiber'
 import { Bloom, EffectComposer, LUT } from '@react-three/postprocessing'
 import { LUTCubeLoader, type LookupTexture } from 'postprocessing'
@@ -35,7 +34,14 @@ export function ProjectsPage() {
   return (
     <>
       <div style={{ position: 'fixed', inset: 0, background: 'black' }}>
-        <Canvas orthographic gl={{ antialias: false }} camera={{ position: [0, 0, 100], zoom: 60 }}>
+        {/* dpr capped: transmission + bloom + LUT at a phone's native 3x is
+            what makes the scene stutter — 1.5 is indistinguishable here */}
+        <Canvas
+          orthographic
+          dpr={[1, 1.5]}
+          gl={{ antialias: false }}
+          camera={{ position: [0, 0, 100], zoom: 60 }}
+        >
           <color attach="background" args={['black']} />
           <FitZoom />
           <Suspense fallback={null}>
@@ -44,20 +50,6 @@ export function ProjectsPage() {
           </Suspense>
         </Canvas>
       </div>
-
-      <Link
-        to="/"
-        style={{
-          position: 'fixed',
-          top: '2rem',
-          left: '2rem',
-          zIndex: 1,
-          color: 'var(--accent)',
-          fontSize: '0.9rem',
-        }}
-      >
-        ← Back home
-      </Link>
     </>
   )
 }
