@@ -24,16 +24,22 @@ export function PrismScene() {
   const boxreflect = useRef<ReflectApi>(null)
   const rainbow = useRef<THREE.Mesh>(null)
   const [vec] = useState(() => new THREE.Vector3())
+  // Last stable beam direction; starts from the upper left so the scene
+  // greets visitors lit instead of dark (matters on touch, where nothing
+  // moves the pointer until the first tap).
+  const [beamDir] = useState(() => new THREE.Vector2(-0.55, 0.75).normalize())
 
   const rayOut = useCallback(() => hitPrism(false), [])
   const rayOver = useCallback((e: RayEvent) => {
     // Break raycast so the ray stops when it touches the prism
     e.stopPropagation()
     hitPrism(true)
-    // Set the intensity really high on first contact
     const material = rainbow.current!.material as RainbowMaterialImpl
     material.speed = 1
-    material.emissiveIntensity = 20
+    // The demo spiked intensity to 20 on every contact — one dramatic flash
+    // with a mouse, but a strobing grey-out on touch, where dragging across
+    // the prism re-enters constantly. Pop gently, and only from dark.
+    if (material.emissiveIntensity < 1) material.emissiveIntensity = 6
   }, [])
 
   const rayMove = useCallback(
@@ -63,11 +69,17 @@ export function PrismScene() {
 
   useFrame((state) => {
     if (!boxreflect.current || !rainbow.current || !spot.current || !ambient.current) return
-    // Tie the beam to the mouse
-    boxreflect.current.setRay(
-      [(state.pointer.x * state.viewport.width) / 2, (state.pointer.y * state.viewport.height) / 2, 0],
-      [0, 0, 0],
-    )
+    // Tie the beam to the pointer. When the pointer sits on/near the prism
+    // the ray origin degenerates and the hit flickers every frame (strobe) —
+    // so the direction only follows the pointer while it's outside the
+    // prism's zone, and the origin never comes closer than that zone.
+    const px = (state.pointer.x * state.viewport.width) / 2
+    const py = (state.pointer.y * state.viewport.height) / 2
+    const dist = Math.hypot(px, py)
+    const minDist = 2.2
+    if (dist > minDist) beamDir.set(px / dist, py / dist)
+    const reach = Math.max(dist, minDist)
+    boxreflect.current.setRay([beamDir.x * reach, beamDir.y * reach, 0], [0, 0, 0])
     // Animate rainbow intensity
     const material = rainbow.current.material as RainbowMaterialImpl
     lerp(material, 'emissiveIntensity', isPrismHit ? 2.5 : 0, 0.1)

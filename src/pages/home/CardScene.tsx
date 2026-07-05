@@ -55,9 +55,14 @@ function Rig(props: { rotation: [number, number, number]; children: React.ReactN
       const dt = Math.max((now - lastT) / 1000, 1e-4)
       lastT = now
       swipe.travel += Math.abs(dx)
-      const turns = dx / el.clientWidth // full drag across the screen = one revolution
+      // Full drag across the screen = 0.4 revolutions (~2 of the 5 cards)
+      const turns = (dx / el.clientWidth) * 0.4
       swipe.offset += turns
-      swipe.velocity = THREE.MathUtils.lerp(swipe.velocity, turns / dt, 0.35)
+      swipe.velocity = THREE.MathUtils.clamp(
+        THREE.MathUtils.lerp(swipe.velocity, turns / dt, 0.35),
+        -0.8,
+        0.8,
+      )
     }
     const up = () => (swipe.dragging = false)
     el.addEventListener('pointerdown', down)
