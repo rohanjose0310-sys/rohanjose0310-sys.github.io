@@ -25,6 +25,9 @@ body,
 #root {
   height: 100%;
   margin: 0;
+  /* Horizontal swipes drive the 3D scenes — don't let the browser turn an
+     edge swipe into history back/forward navigation. */
+  overscroll-behavior: none;
 }
 
 /* Demo-faithful touches: soft canvas reveal + neon-lime dot cursor. */

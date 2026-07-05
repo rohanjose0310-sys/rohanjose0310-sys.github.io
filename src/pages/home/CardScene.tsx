@@ -2,13 +2,14 @@
 // with one addition: clicking a card navigates to its section route.
 // https://github.com/pmndrs/examples/tree/main/demos/cards-with-border-radius
 import * as THREE from 'three'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import type { ThreeEvent } from '@react-three/fiber'
 import { Image, Text, ScrollControls, useScroll, useTexture } from '@react-three/drei'
 import { useNavigate } from 'react-router-dom'
 import { easing } from 'maath'
 import { CARDS } from './cardData'
+import { swipe } from './swipe'
 import './util'
 
 export function CardScene() {
@@ -30,8 +31,54 @@ export function CardScene() {
 function Rig(props: { rotation: [number, number, number]; children: React.ReactNode }) {
   const ref = useRef<THREE.Group>(null!)
   const scroll = useScroll()
+
+  // Drag/swipe to spin: horizontal pointer drags (finger or mouse) rotate the
+  // carousel directly, with inertia after release. Desktop wheel scrolling
+  // still spins it through ScrollControls.
+  useEffect(() => {
+    const el = scroll.el
+    let lastX = 0
+    let lastT = 0
+    const down = (e: PointerEvent) => {
+      if (!e.isPrimary) return
+      swipe.dragging = true
+      swipe.travel = 0
+      swipe.velocity = 0
+      lastX = e.clientX
+      lastT = performance.now()
+    }
+    const move = (e: PointerEvent) => {
+      if (!swipe.dragging || !e.isPrimary) return
+      const dx = e.clientX - lastX
+      lastX = e.clientX
+      const now = performance.now()
+      const dt = Math.max((now - lastT) / 1000, 1e-4)
+      lastT = now
+      swipe.travel += Math.abs(dx)
+      const turns = dx / el.clientWidth // full drag across the screen = one revolution
+      swipe.offset += turns
+      swipe.velocity = THREE.MathUtils.lerp(swipe.velocity, turns / dt, 0.35)
+    }
+    const up = () => (swipe.dragging = false)
+    el.addEventListener('pointerdown', down)
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', up)
+    return () => {
+      el.removeEventListener('pointerdown', down)
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', up)
+    }
+  }, [scroll.el])
+
   useFrame((state, delta) => {
-    ref.current.rotation.y = -scroll.offset * (Math.PI * 2) // Rotate contents
+    if (!swipe.dragging) {
+      swipe.offset += swipe.velocity * delta
+      swipe.velocity *= Math.exp(-3 * delta) // inertia decay
+    }
+    // Rotate contents: wheel scroll and drag offsets combine
+    ref.current.rotation.y = (swipe.offset - scroll.offset) * (Math.PI * 2)
     state.events.update?.() // Raycasts every frame rather than on pointer-move
     easing.damp3(state.camera.position, [-state.pointer.x * 2, state.pointer.y + 1.5, 10], 0.3, delta)
     state.camera.lookAt(0, 0, 0)
@@ -77,6 +124,8 @@ function Card({ url, label, route, ...props }: CardProps) {
   const pointerOut = () => hover(false)
   const click = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation()
+    // A click also fires after a swipe ends on this card — ignore those
+    if (swipe.travel > 12) return
     navigate(route)
   }
   useFrame((_state, delta) => {
@@ -104,6 +153,9 @@ function Card({ url, label, route, ...props }: CardProps) {
       <Text
         position={[0, -0.64, -0.01]}
         rotation={[0, Math.PI, 0]}
+        // Self-hosted: without a font prop, troika fetches one from a CDN at
+        // runtime, and a failed fetch takes down the whole scene.
+        font="/fonts/Inter-Regular.ttf"
         fontSize={0.085}
         letterSpacing={0.02}
         color="#111"
@@ -125,7 +177,7 @@ function Banner(props: { position: [number, number, number] }) {
     const material = ref.current.material as InstanceType<
       typeof import('./util').MeshSineMaterial
     > & { map: THREE.Texture }
-    material.time.value += Math.abs(scroll.delta) * 4
+    material.time.value += (Math.abs(scroll.delta) + Math.abs(swipe.velocity) * delta) * 4
     material.map.offset.x += delta / 2
   })
   return (

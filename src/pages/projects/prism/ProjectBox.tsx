@@ -52,6 +52,10 @@ export function ProjectBox({ project, ...props }: ProjectBoxProps) {
         geometry={boxGeometry}
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
+        // Touch has no hover: tapping the box shows the card, tapping
+        // anywhere else hides it.
+        onPointerDown={() => setHovered(true)}
+        onPointerMissed={() => setHovered(false)}
         {...rayProps({ onRayOver: () => setRayHit(true), onRayOut: () => setRayHit(false) })}
       />
       <mesh ref={inner} geometry={roundedBoxGeometry}>
