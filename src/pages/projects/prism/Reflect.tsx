@@ -14,6 +14,8 @@ interface RayHit {
   key: string
   intersect: RayIntersection
   stopped: boolean
+  /** Consecutive frames this hit was absent from the current intersects. */
+  missed: number
 }
 
 export interface ReflectApi {
@@ -135,14 +137,25 @@ export const Reflect = forwardRef<ReflectApi, ReflectProps>(
 
           // Reset and count up once again
           self.number = 1
-          // Check onRayOut: if a previous hit is no longer among the intersects
+          // Check onRayOut: a multi-bounce reflection chain is chaotic — a
+          // sub-pixel jitter in pointer position can, after several bounces,
+          // flip which face of a low-poly hitbox is struck, dropping an
+          // object from one frame's intersects and putting it back the next.
+          // Require a few consecutive misses before treating contact as
+          // truly lost, instead of firing onRayOut on a single dropped frame
+          // (which was reading as flicker on longer bounce chains, e.g. any
+          // path that eventually reaches the prism).
+          const MISS_TOLERANCE = 3
           self.hits.forEach((hit) => {
             if (!intersects.find((intersect) => intersect.object.uuid === hit.key)) {
-              self.hits.delete(hit.key)
-              const object = hit.intersect.object as RayMesh
-              if (object.onRayOut) {
-                invalidate()
-                object.onRayOut(createEvent(self, hit, hit.intersect, intersects))
+              hit.missed++
+              if (hit.missed >= MISS_TOLERANCE) {
+                self.hits.delete(hit.key)
+                const object = hit.intersect.object as RayMesh
+                if (object.onRayOut) {
+                  invalidate()
+                  object.onRayOut(createEvent(self, hit, hit.intersect, intersects))
+                }
               }
             }
           })
@@ -151,7 +164,7 @@ export const Reflect = forwardRef<ReflectApi, ReflectProps>(
           for (intersect of intersects) {
             self.number++
             if (!self.hits.has(intersect.object.uuid)) {
-              const hit: RayHit = { key: intersect.object.uuid, intersect, stopped: false }
+              const hit: RayHit = { key: intersect.object.uuid, intersect, stopped: false, missed: 0 }
               self.hits.set(intersect.object.uuid, hit)
               const object = intersect.object as RayMesh
               if (object.onRayOver) {
@@ -161,6 +174,7 @@ export const Reflect = forwardRef<ReflectApi, ReflectProps>(
             }
 
             const hit = self.hits.get(intersect.object.uuid)!
+            hit.missed = 0 // found again this frame — cancel any pending onRayOut
             const object = intersect.object as RayMesh
             if (object.onRayMove) {
               invalidate()
