@@ -24,15 +24,7 @@ function Effects() {
   const lut = useLoader(LUTCubeLoader, lutTexture) as LookupTexture
   return (
     <EffectComposer>
-      {/* The demo pins three@0.165 / @react-three/postprocessing@2.x; this
-          site runs three@0.185 / @react-three/postprocessing@3.x. Bloom's
-          mipmap-blur has changed across that gap — the demo's intensity=1.5
-          reads as a contained rainbow trail there, but whites out the whole
-          frame on this version combo on real GPUs (confirmed on device;
-          this project's software-rendered test browser can't reproduce
-          real-GPU bloom, so this value is calibrated from live feedback,
-          not local verification). */}
-      <Bloom mipmapBlur levels={9} intensity={0.5} luminanceThreshold={1.1} luminanceSmoothing={0.5} />
+      <Bloom mipmapBlur levels={9} intensity={1.5} luminanceThreshold={1} luminanceSmoothing={1} />
       <LUT lut={lut} />
     </EffectComposer>
   )
