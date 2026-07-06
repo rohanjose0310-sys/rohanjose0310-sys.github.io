@@ -29,6 +29,7 @@ export function PrismScene() {
   // greets visitors lit instead of dark (matters on touch, where nothing
   // moves the pointer until the first tap).
   const [beamDir] = useState(() => new THREE.Vector2(-0.55, 0.75).normalize())
+  const [beamDirTarget] = useState(() => new THREE.Vector2())
 
   const rayOut = useCallback(() => hitPrism(false), [])
   const rayOver = useCallback((e: RayEvent) => {
@@ -68,7 +69,7 @@ export function PrismScene() {
     [vec],
   )
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (!boxreflect.current || !rainbow.current || !spot.current || !ambient.current) return
     // The pointer steers the beam's direction; the beam itself always enters
     // from beyond the screen edge. An origin tied to the pointer position
@@ -78,7 +79,16 @@ export function PrismScene() {
     const px = (state.pointer.x * state.viewport.width) / 2
     const py = (state.pointer.y * state.viewport.height) / 2
     const dist = Math.hypot(px, py)
-    if (dist > 0.5) beamDir.set(px / dist, py / dist)
+    if (dist > 0.5) {
+      // Damped steering: a held finger trembles a few px every frame, and the
+      // rainbow's rotation amplifies the incident angle 6× — undamped, the
+      // whole composition jitters while aiming at the prism.
+      beamDirTarget.set(px / dist, py / dist)
+      beamDir.lerp(beamDirTarget, Math.min(1, 1 - Math.exp(-8 * delta)))
+      // Opposite directions can lerp through zero length — snap instead
+      if (beamDir.lengthSq() < 1e-4) beamDir.copy(beamDirTarget)
+      beamDir.normalize()
+    }
     const reach = Math.hypot(state.viewport.width, state.viewport.height) / 2 + 2
     boxreflect.current.setRay([beamDir.x * reach, beamDir.y * reach, 0], [0, 0, 0])
     // Animate rainbow intensity
