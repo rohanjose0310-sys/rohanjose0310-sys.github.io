@@ -24,10 +24,7 @@ function Effects() {
   const lut = useLoader(LUTCubeLoader, lutTexture) as LookupTexture
   return (
     <EffectComposer>
-      {/* levels trimmed from the demo's 9: the deepest 1-2px mips are what
-          smear a bright frame into a full-screen wash (and misbehave on some
-          mobile GPUs) — 7 keeps the glow tight around the light itself */}
-      <Bloom mipmapBlur levels={7} intensity={1.5} luminanceThreshold={1} luminanceSmoothing={1} />
+      <Bloom mipmapBlur levels={9} intensity={1.5} luminanceThreshold={1} luminanceSmoothing={1} />
       <LUT lut={lut} />
     </EffectComposer>
   )
@@ -37,14 +34,7 @@ export function ProjectsPage() {
   return (
     <>
       <div style={{ position: 'fixed', inset: 0, background: 'black' }}>
-        {/* dpr capped: transmission + bloom + LUT at a phone's native 3x is
-            what makes the scene stutter — 1.5 is indistinguishable here */}
-        <Canvas
-          orthographic
-          dpr={[1, 1.5]}
-          gl={{ antialias: false, alpha: false }}
-          camera={{ position: [0, 0, 100], zoom: 60 }}
-        >
+        <Canvas orthographic gl={{ antialias: false }} camera={{ position: [0, 0, 100], zoom: 60 }}>
           <color attach="background" args={['black']} />
           <FitZoom />
           <Suspense fallback={null}>

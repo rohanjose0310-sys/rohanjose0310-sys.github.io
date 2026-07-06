@@ -25,23 +25,16 @@ export function PrismScene() {
   const boxreflect = useRef<ReflectApi>(null)
   const rainbow = useRef<THREE.Mesh>(null)
   const [vec] = useState(() => new THREE.Vector3())
-  // Last stable beam direction; starts from the upper left so the scene
-  // greets visitors lit instead of dark (matters on touch, where nothing
-  // moves the pointer until the first tap).
-  const [beamDir] = useState(() => new THREE.Vector2(-0.55, 0.75).normalize())
-  const [beamDirTarget] = useState(() => new THREE.Vector2())
 
   const rayOut = useCallback(() => hitPrism(false), [])
   const rayOver = useCallback((e: RayEvent) => {
     // Break raycast so the ray stops when it touches the prism
     e.stopPropagation()
     hitPrism(true)
+    // Set the intensity really high on first contact
     const material = rainbow.current!.material as RainbowMaterialImpl
     material.speed = 1
-    // The demo spiked intensity to 20 on every contact — one dramatic flash
-    // with a mouse, but a strobing grey-out on touch, where dragging across
-    // the prism re-enters constantly. Pop gently, and only from dark.
-    if (material.emissiveIntensity < 1) material.emissiveIntensity = 6
+    material.emissiveIntensity = 20
   }, [])
 
   const rayMove = useCallback(
@@ -69,28 +62,13 @@ export function PrismScene() {
     [vec],
   )
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     if (!boxreflect.current || !rainbow.current || !spot.current || !ambient.current) return
-    // The pointer steers the beam's direction; the beam itself always enters
-    // from beyond the screen edge. An origin tied to the pointer position
-    // (as in the demo) can sit inside the prism or a box, which makes the
-    // raycast flicker every frame — from outside the viewport it always
-    // sweeps cleanly across the scene and deflects off boxes in its path.
-    const px = (state.pointer.x * state.viewport.width) / 2
-    const py = (state.pointer.y * state.viewport.height) / 2
-    const dist = Math.hypot(px, py)
-    if (dist > 0.5) {
-      // Damped steering: a held finger trembles a few px every frame, and the
-      // rainbow's rotation amplifies the incident angle 6× — undamped, the
-      // whole composition jitters while aiming at the prism.
-      beamDirTarget.set(px / dist, py / dist)
-      beamDir.lerp(beamDirTarget, Math.min(1, 1 - Math.exp(-8 * delta)))
-      // Opposite directions can lerp through zero length — snap instead
-      if (beamDir.lengthSq() < 1e-4) beamDir.copy(beamDirTarget)
-      beamDir.normalize()
-    }
-    const reach = Math.hypot(state.viewport.width, state.viewport.height) / 2 + 2
-    boxreflect.current.setRay([beamDir.x * reach, beamDir.y * reach, 0], [0, 0, 0])
+    // Tie the beam to the mouse
+    boxreflect.current.setRay(
+      [(state.pointer.x * state.viewport.width) / 2, (state.pointer.y * state.viewport.height) / 2, 0],
+      [0, 0, 0],
+    )
     // Animate rainbow intensity
     const material = rainbow.current.material as RainbowMaterialImpl
     lerp(material, 'emissiveIntensity', isPrismHit ? 2.5 : 0, 0.1)
