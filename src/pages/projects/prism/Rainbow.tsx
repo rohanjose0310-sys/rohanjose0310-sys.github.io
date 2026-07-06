@@ -89,15 +89,22 @@ const RainbowMaterial = shaderMaterial(
       float cosR = dir.y / len;
       float sinR = dir.x / len;
       vec2 uv = (mat2(cosR, -sinR, sinR, cosR) * (vUv * vec2(ratio, 1.) - vec2(0., 1.) - vstart * vec2(1., -1.)) / len);
-      float a = atan(uv.x, uv.y) * 10.0;
+      // NaN guards (added to the original shader): at the quad's pivot pixel
+      // uv is (0,0), making atan(0,0) and 0/0 undefined. Desktop GPUs tend to
+      // return 0, but Apple GPUs emit NaN — and one NaN pixel poisons Bloom's
+      // whole mipmap chain, flashing the entire screen every other frame.
+      float a = atan(uv.x, uv.y + 1e-5) * 10.0;
       float s = uv.y * (endRadius - startRadius) + startRadius;
+      s = (s < 0.0 ? -1.0 : 1.0) * max(abs(s), 1e-4);
       float w = (uv.x / s + .5) * 300. + 400. + a;
       vec3 c = spectral_zucconi6(w, time); // [400, 700]
       float l = 1. - smoothstep(fade, 1., uv.y);
       float area = uv.y < 0. ? 0. : 1.;
       float brightness = smoothstep(0., 0.5, c.x + c.y + c.z);
-      vec3 co = c / iridescence(uv.x * 0.5 * 3.14159, 1.0 - uv.y + time / 10.0) / 20.0;
-      gl_FragColor = vec4(area * co * l * brightness * emissiveIntensity, 1.0);
+      vec3 irid = max(iridescence(uv.x * 0.5 * 3.14159, 1.0 - uv.y + time / 10.0), vec3(1e-4));
+      vec3 co = c / irid / 20.0;
+      vec3 color = clamp(area * co * l * brightness * emissiveIntensity, 0.0, 60.0);
+      gl_FragColor = vec4(color, 1.0);
       if (gl_FragColor.r + gl_FragColor.g + gl_FragColor.b < 0.01) discard;
       #include <colorspace_fragment>
     }`,
