@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Preload, Scroll, ScrollControls } from '@react-three/drei'
 import { SceneCanvasLayout } from '../../layout/SceneCanvasLayout'
 import { Images, Lens, Typography } from './LensScene'
@@ -37,7 +38,7 @@ export function AboutPage() {
   )
 }
 
-// Static page chrome from the demo's index.jsx Overlay (placeholder copy).
+// Static page chrome: back button top-left, bio lines bottom-left, sign-off bottom-right.
 function AboutOverlay() {
   return (
     <div
@@ -51,13 +52,17 @@ function AboutOverlay() {
         color: 'black',
         fontSize: '13px',
       }}>
-      <a href="https://pmnd.rs/" style={{ position: 'absolute', bottom: 40, left: 90, color: 'black', textDecoration: 'none', pointerEvents: 'all' }}>
-        pmnd.rs
+      <Link
+        to="/"
+        style={{ position: 'absolute', top: 40, left: 40, color: 'black', textDecoration: 'none', pointerEvents: 'all' }}>
+        ← back
+      </Link>
+      <div style={{ position: 'absolute', bottom: 40, left: 40 }}>
+        Coder to Designer
         <br />
-        dev collective
-      </a>
-      <div style={{ position: 'absolute', top: 40, left: 40 }}>good —</div>
-      <div style={{ position: 'absolute', bottom: 40, right: 40 }}>08/01/2023</div>
+        From Accra to Chicago to Melbourne
+      </div>
+      <div style={{ position: 'absolute', bottom: 40, right: 40 }}>Designed with Love</div>
     </div>
   )
 }
