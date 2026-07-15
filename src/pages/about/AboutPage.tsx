@@ -17,13 +17,17 @@ export function AboutPage() {
               <Images />
             </Scroll>
             <Scroll html>
-              <div style={{ transform: 'translate3d(65vw, 192vh, 0)', color: 'black', fontSize: '15px' }}>
-                PMNDRS Pendant lamp
-                <br />
-                bronze, 38 cm
-                <br />
-                CHF 59.95
-                <br />
+              <div
+                style={{
+                  transform: 'translate3d(65vw, 192vh, 0)',
+                  color: 'black',
+                  fontSize: '15px',
+                  maxWidth: '300px',
+                  lineHeight: 1.5,
+                }}>
+                Years in code, a short detour through startup life, then design - because that's where the
+                future gets drawn first. Now I build technology, wearable or not, hoping some of it helps us
+                reach further out.
               </div>
             </Scroll>
             {/** This is a helper that pre-emptively makes threejs aware of all geometries, textures etc
