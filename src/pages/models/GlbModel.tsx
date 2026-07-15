@@ -16,6 +16,11 @@ import {
 // and upgrades Fusion's flat Kd-only materials to PBR by material name.
 const TARGET_SIZE = 1.55
 
+// useGLTF hands back one shared, cached scene. Track which scenes we've already
+// upgraded so remounting (switching models and back) doesn't spawn duplicate
+// materials every time.
+const upgradedScenes = new WeakSet<object>()
+
 function upgradeMaterial(material: Material): Material {
   const name = material.name
   if (/glass/i.test(name)) {
@@ -71,17 +76,23 @@ export function GlbModel({ url, rotation = [0, 0, 0] }: { url: string; rotation?
   const { scene } = useGLTF(url)
 
   const { offset, scale } = useMemo(() => {
-    scene.traverse((child) => {
-      if (child instanceof Mesh) {
-        child.castShadow = child.receiveShadow = true
-        child.material = upgradeMaterial(child.material as Material)
-      }
-    })
+    if (!upgradedScenes.has(scene)) {
+      scene.traverse((child) => {
+        if (child instanceof Mesh) {
+          child.castShadow = child.receiveShadow = true
+          child.material = upgradeMaterial(child.material as Material)
+        }
+      })
+      upgradedScenes.add(scene)
+    }
+    // Measure the scene's pristine bounds. The resulting transform is applied to
+    // a wrapper <group> below, never to `scene` itself, so this measurement is
+    // identical on every (re)mount instead of compounding the previous scale.
     const box = new Box3().setFromObject(scene)
     const size = box.getSize(new Vector3())
     const center = box.getCenter(new Vector3())
     const s = TARGET_SIZE / Math.max(size.x, size.y, size.z)
-    return { offset: center.multiplyScalar(-s), scale: s }
+    return { offset: center.multiplyScalar(-s).toArray(), scale: s }
   }, [scene])
 
   useFrame((state) => {
@@ -93,7 +104,9 @@ export function GlbModel({ url, rotation = [0, 0, 0] }: { url: string; rotation?
   return (
     <group ref={ref}>
       <group rotation={rotation}>
-        <primitive object={scene} position={offset.toArray()} scale={scale} />
+        <group position={offset} scale={scale}>
+          <primitive object={scene} />
+        </group>
       </group>
     </group>
   )

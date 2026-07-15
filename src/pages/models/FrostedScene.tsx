@@ -16,6 +16,10 @@ export function FrostedScene() {
     <Canvas
       eventSource={document.getElementById('root') as HTMLElement}
       eventPrefix="client"
+      // Cap DPR: the transmission lens renders the scene to a buffer every
+      // frame, so 2x on Retina roughly quadruples that cost for no visible gain
+      // (the frost is blurred anyway).
+      dpr={[1, 1.5]}
       camera={{ position: [0, 0, 4], fov: 40 }}
     >
       {/* No PerfGuardrails here: AdaptiveDpr softens the whole canvas, which
@@ -52,7 +56,7 @@ function Selector({ children }: { children: ReactNode }) {
     <>
       <mesh ref={ref}>
         <circleGeometry args={[1, 64, 64]} />
-        <MeshTransmissionMaterial samples={16} resolution={512} anisotropicBlur={0.1} thickness={0.1} roughness={0.4} toneMapped={true} />
+        <MeshTransmissionMaterial samples={10} resolution={256} anisotropicBlur={0.1} thickness={0.1} roughness={0.4} toneMapped={true} />
       </mesh>
       <group
         onPointerOver={() => (store.open = true)}
