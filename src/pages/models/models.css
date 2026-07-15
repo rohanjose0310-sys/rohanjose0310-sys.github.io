@@ -1,0 +1,144 @@
+@import url('https://rsms.me/inter/inter.css');
+@import url('https://fonts.googleapis.com/css2?family=Major+Mono+Display&display=swap');
+
+/* Scoped port of demos/frosted-glass styles — light theme lives only on this
+   page so the global dark theme is untouched. */
+.frosted {
+  position: fixed;
+  inset: 0;
+  font-family: 'Inter', sans-serif;
+  background: #d0d0d0; /* visible behind the canvas during its fade-in */
+  color: black;
+}
+
+.frosted a {
+  pointer-events: all;
+  color: black;
+  text-decoration: none;
+}
+
+.frosted ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  overflow: hidden;
+}
+
+.frosted li {
+  display: block;
+  overflow: hidden;
+}
+
+.frosted ul,
+.frosted li {
+  list-style: none;
+  margin: 0;
+  padding: 0px;
+}
+
+.frosted .info {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 400px;
+  transform: translate3d(-50%, -50%, 0);
+  border-left: 1px solid black;
+  padding-left: 40px;
+  user-select: none;
+}
+
+.frosted .info p {
+  font-size: 16px;
+  line-height: 1.25em;
+  margin-bottom: 0.2em;
+}
+
+.frosted .accent {
+  -webkit-text-stroke: 1px black;
+  color: transparent;
+}
+
+.frosted .tag {
+  display: inline-block;
+  font-family: 'Major Mono Display', monospace;
+  /* Major Mono Display maps capitals to a heavier alternate glyph (thick
+     bottom stroke on 'F'); lowercasing the render makes every glyph uniform. */
+  text-transform: lowercase;
+  background: black;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.frosted .info h1 {
+  font-family: 'Major Mono Display', monospace;
+  font-size: 2em;
+  margin-bottom: 0.5em;
+  color: black;
+  font-weight: 400;
+}
+
+.frosted .info h3 {
+  font-weight: 800;
+  font-size: 5em;
+  letter-spacing: -4px;
+  line-height: 1em;
+  margin: 0;
+  color: black;
+}
+
+.frosted .info h4 {
+  font-weight: 300;
+  font-size: 1.15em;
+  letter-spacing: -1px;
+  margin: 10px 0;
+  color: black;
+}
+
+/* Top-left model menu — same typographic language as the template: Major Mono
+   heading (like the info numeral), 13px Inter items (like the corner labels),
+   and a thin black left rule echoing the .info border. */
+.frosted .model-menu {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  user-select: none;
+}
+
+.frosted .model-menu h2 {
+  font-family: 'Major Mono Display', monospace;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: black;
+  margin: 0 0 14px;
+}
+
+.frosted .model-menu ul {
+  gap: 6px;
+}
+
+.frosted .model-menu button {
+  all: unset;
+  pointer-events: all;
+  cursor: pointer;
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: black;
+  opacity: 0.35;
+  border-left: 1px solid transparent;
+  padding-left: 10px;
+  transition: opacity 0.2s ease;
+}
+
+.frosted .model-menu button:hover {
+  opacity: 0.7;
+}
+
+.frosted .model-menu button.active {
+  opacity: 1;
+  font-weight: 800;
+  border-left: 1px solid black;
+}
