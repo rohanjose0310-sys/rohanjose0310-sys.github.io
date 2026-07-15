@@ -30,6 +30,14 @@ body,
   overscroll-behavior: none;
 }
 
+/* Space-tech orange dot cursor across the site. The frosted-glass models page
+   opts back out to the default cursor (see models.css). */
+body {
+  cursor:
+    url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxMCIgZmlsbD0iI0ZGNkEwMCIvPjwvc3ZnPg=='),
+    auto;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

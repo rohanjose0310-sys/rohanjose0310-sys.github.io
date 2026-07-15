@@ -9,6 +9,8 @@
   font-family: 'Inter', sans-serif;
   background: #d0d0d0; /* visible behind the canvas during its fade-in */
   color: black;
+  /* Opt out of the global orange dot cursor — this page keeps the default. */
+  cursor: auto;
 }
 
 .frosted a {
