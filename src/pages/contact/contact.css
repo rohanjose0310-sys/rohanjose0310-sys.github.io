@@ -1,0 +1,221 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+
+/* Contact page: light "white space" front with a centered form column and two
+   shader panels bleeding off the edges (bottom-left + right third). */
+.contact-page {
+  position: relative;
+  min-height: 100%;
+  overflow: hidden;
+  padding: 7rem 1.5rem 9rem;
+  background: #e9ebed;
+  color: #111;
+}
+
+.contact-page .corner {
+  position: absolute;
+  top: 2rem;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #111;
+  text-decoration: none;
+  z-index: 2;
+}
+
+.contact-page .corner.left {
+  left: 2.5rem;
+  font-weight: 700;
+}
+
+.contact-page .back-link {
+  position: absolute;
+  top: calc(2rem + 1.6rem);
+  left: 2.5rem;
+  font-size: 13px;
+  color: #111;
+  text-decoration: none;
+  text-transform: none;
+  z-index: 2;
+}
+
+.contact-page .corner.right {
+  right: 2.5rem;
+  opacity: 0.6;
+}
+
+.contact-form {
+  position: relative;
+  z-index: 1;
+  width: min(620px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-form h1 {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400;
+  font-size: clamp(2rem, 3.2vw, 2.75rem);
+  line-height: 1.15;
+  text-align: center;
+  color: #111;
+  margin: 0 0 4rem;
+}
+
+.contact-form h1.second {
+  margin: 4.5rem 0 3rem;
+}
+
+.contact-form label {
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0;
+}
+
+.contact-form label .req {
+  color: var(--accent);
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #111;
+  color: #111;
+  font: inherit;
+  padding: 0.2rem 0 0.6rem;
+  margin-bottom: 3.2rem;
+  border-radius: 0;
+  caret-color: var(--accent);
+  resize: vertical;
+  min-height: 0;
+}
+
+.contact-form textarea {
+  min-height: 2.6rem;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-bottom-color: var(--accent);
+}
+
+/* Stepped black SEND block, like the reference. */
+.contact-form button {
+  align-self: center;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 15px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: #111;
+  color: #e9ebed;
+  padding: 1.05rem 4.5rem;
+  margin-top: 1rem;
+  box-shadow:
+    -14px 12px 0 rgba(17, 17, 17, 0.22),
+    14px -12px 0 rgba(17, 17, 17, 0.12);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.contact-form button:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    -18px 15px 0 rgba(17, 17, 17, 0.26),
+    18px -15px 0 rgba(17, 17, 17, 0.14);
+}
+
+/* Shader panels bleed off the viewport like the reference layout. */
+.shader-panel {
+  position: absolute;
+  z-index: 0;
+}
+
+.shader-panel canvas {
+  display: block;
+}
+
+.shader-panel.left {
+  left: 0;
+  top: 76vh; /* lower-left of the first viewport, like the reference */
+  width: 24vw;
+  height: 42vh;
+  min-width: 240px;
+}
+
+.shader-panel.right {
+  right: -9vw;
+  top: 40vh; /* anchored to the first viewport, like the reference */
+  width: 33vw;
+  height: 70vh;
+  min-width: 300px;
+}
+
+.panel-links {
+  position: absolute;
+  right: 4vw;
+  top: 62vh;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.panel-links a {
+  color: #fff;
+  font-size: 0.95rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.panel-links a:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 900px) {
+  .shader-panel.left {
+    display: none;
+  }
+  .shader-panel.right {
+    top: auto;
+    bottom: -8rem;
+    right: -12vw;
+    width: 70vw;
+    height: 40vh;
+  }
+  .panel-links {
+    position: relative;
+    z-index: 1;
+    top: auto;
+    right: auto;
+    margin-top: 5rem;
+    align-items: center;
+  }
+  .panel-links a {
+    color: #111;
+  }
+}
+
+.send-status {
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: 1.2rem;
+  color: #333;
+}
+
+.send-status.error a {
+  color: var(--accent);
+}
+
+.contact-form button:disabled {
+  cursor: default;
+  opacity: 0.75;
+  transform: none;
+}
