@@ -31,9 +31,12 @@ roundedBoxGeometry.computeVertexNormals()
 
 type ProjectBoxProps = Omit<ThreeElements['group'], 'ref'> & {
   project?: Project
+  /** Hover-card offset in px: [horizontal, upward] from the box center. Push
+   *  outward so the card doesn't overlap the central prism. */
+  cardOffset?: [number, number]
 }
 
-export function ProjectBox({ project, ...props }: ProjectBoxProps) {
+export function ProjectBox({ project, cardOffset = [0, 48], ...props }: ProjectBoxProps) {
   const [rayHit, setRayHit] = useState(false)
   const [hovered, setHovered] = useState(false)
   const inner = useRef<THREE.Mesh>(null)
@@ -65,9 +68,9 @@ export function ProjectBox({ project, ...props }: ProjectBoxProps) {
         <Html center zIndexRange={[100, 0]} style={{ pointerEvents: 'none' }}>
           <div
             style={{
-              // Anchored at the box center: lift the card its own half-height
-              // plus a fixed gap so it floats just above the box.
-              transform: 'translateY(calc(-50% - 48px))',
+              // Anchored at the box center: lift by its own half-height, then
+              // offset outward (away from the central prism) per cardOffset.
+              transform: `translate(${cardOffset[0]}px, calc(-50% - ${cardOffset[1]}px))`,
               display: 'flex',
               flexDirection: 'column',
               gap: '0.4rem',
@@ -75,7 +78,7 @@ export function ProjectBox({ project, ...props }: ProjectBoxProps) {
               padding: '0.45rem',
               borderRadius: '0.6rem',
               background: 'rgba(11, 11, 15, 0.85)',
-              border: '1px solid rgba(170, 255, 0, 0.4)',
+              border: '1px solid rgba(255, 106, 0, 0.5)',
               boxShadow: '0 0.5rem 2rem rgba(0, 0, 0, 0.6)',
               backdropFilter: 'blur(6px)',
               animation: 'fade-in 0.25s ease both',

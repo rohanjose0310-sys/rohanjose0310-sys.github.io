@@ -103,8 +103,8 @@ export function PrismScene() {
       {/* Prism + project boxes + reflect beam */}
       <Beam ref={boxreflect} bounce={10} far={20}>
         <Prism position={[0, -0.5, 0]} onRayOver={rayOver} onRayOut={rayOut} onRayMove={rayMove} />
-        <ProjectBox project={PROJECTS[0]} position={[-2.5, -2.5, 0]} rotation={[0, 0, Math.PI / 4]} />
-        <ProjectBox project={PROJECTS[1]} position={[2.25, -3.5, 0]} rotation={[0, 0, Math.PI / 3.5]} />
+        <ProjectBox project={PROJECTS[0]} position={[-2.5, -2.5, 0]} rotation={[0, 0, Math.PI / 4]} cardOffset={[-130, 8]} />
+        <ProjectBox project={PROJECTS[1]} position={[2.25, -3.5, 0]} rotation={[0, 0, Math.PI / 3.5]} cardOffset={[140, 8]} />
         <ProjectBox position={[-3, 1, 0]} rotation={[0, 0, Math.PI / 4]} />
       </Beam>
       {/* Rainbow and flares */}
