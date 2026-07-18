@@ -61,6 +61,15 @@ html.touch .about-back {
   left: calc(24px + env(safe-area-inset-left, 0px));
 }
 
+/* Touch now has a real, tall, scrollable document (see AboutPage's spacer) so
+   iOS Safari genuinely bleeds under its bottom bar. .about-overlay is
+   `position: absolute` for desktop's short single-viewport page, but on touch
+   that would scroll away with the new document scroll — pin it like the
+   canvas instead. */
+html.touch .about-overlay {
+  position: fixed;
+}
+
 /* Auto-contrast the chrome text against whatever image scrolls behind it.
    Ink vars are set per-frame from a luminance readback of the scene buffer
    (see LensScene bufferLuma) — mix-blend-mode can't blend over a WebGL canvas

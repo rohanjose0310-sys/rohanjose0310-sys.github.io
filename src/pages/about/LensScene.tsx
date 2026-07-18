@@ -6,6 +6,18 @@ import { easing } from 'maath'
 // Touch devices get different lens + type behavior (drag/spring-back lens,
 // down-scaled typography). Desktop keeps the original pmndrs code paths.
 import { IS_TOUCH } from '../../lib/touch'
+import { useTouchScroll } from './touchScroll'
+
+// Desktop reads real scroll from drei's ScrollControls; touch reads it from
+// our own real-document-scroll provider (see touchScroll.tsx for why). Both
+// hooks are called unconditionally (IS_TOUCH is a load-time constant, so the
+// branch never changes within a component's lifetime) and each is inert
+// without its matching provider, so this is safe either way.
+function useScrollUnified() {
+  const drei = useScroll()
+  const touch = useTouchScroll()
+  return IS_TOUCH ? touch : drei
+}
 
 // Faithful TS port of pmndrs/examples "scrollcontrols-and-lens-refraction".
 // Assets live in public/about/ (swapped for real content later).
@@ -170,7 +182,7 @@ const CARD_SCROLL_CENTER = 0.5
 // fixed over the whole page.
 function GlassCard({ buffer, text }: { buffer: THREE.Texture; text: string }) {
   const group = useRef<THREE.Group>(null!)
-  const scroll = useScroll()
+  const scroll = useScrollUnified()
   // World units at the card's depth z=15 are a fixed 0.25 of the z=0 viewport
   // (camera z=20, so distance ratio 5/20); reading the stable z=0 viewport
   // avoids re-rendering every frame and still tracks resizes.
@@ -222,7 +234,7 @@ type ImageMesh = THREE.Mesh & { material: { zoom: number; grayscale: number } }
 
 export function Images() {
   const group = useRef<THREE.Group>(null!)
-  const data = useScroll()
+  const data = useScrollUnified()
   const { width, height } = useThree((state) => state.viewport)
   useFrame(() => {
     const images = group.current.children as ImageMesh[]
