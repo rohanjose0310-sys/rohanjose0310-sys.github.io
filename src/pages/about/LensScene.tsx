@@ -53,14 +53,13 @@ export function Lens({
   const { nodes } = useGLTF(LENS_MODEL)
   const buffer = useFBO()
   const viewport = useThree((state) => state.viewport)
+  const scroll = useScroll()
   const [scene] = useState(() => new THREE.Scene())
   // Touch: the lens rests top-right; dragging it follows the finger, and on
   // release it eases back home (Preview-app magnifier behavior).
   const dragging = useRef(false)
-  // Throttle accumulator + round-robin cursor for the footer auto-contrast
-  // readback (touch only) — one small GPU→CPU read per tick keeps stalls rare.
+  // Throttle accumulator for the back-link auto-contrast readback (touch only).
   const inkClock = useRef(0)
-  const inkIndex = useRef(0)
   const lensRadius = useMemo(() => {
     // Radius of the screen-facing circular face (bbox x-extent), not the
     // bounding sphere — that would also include the cylinder's height.
@@ -116,18 +115,23 @@ export function Lens({
     state.gl.render(scene, state.camera)
     state.gl.setRenderTarget(null)
 
-    // Auto-contrast the footer/back chrome against the freshly-rendered scene
-    // buffer behind it. One sample per tick, round-robined across the three
-    // chrome spots (~each refreshes 2-3x/sec) so the readback stall stays rare.
     if (IS_TOUCH) {
+      // Reveal the footer only as the last page (the group photo) comes into
+      // view, so it lands over that photo at the bottom instead of following
+      // the whole scroll. Ramp 0→1 across the final stretch of the scroll.
+      const shown = Math.max(0, Math.min(1, (scroll.offset - 0.85) / 0.1))
+      document.documentElement.style.setProperty('--about-footer-shown', shown.toFixed(3))
+
+      // Auto-contrast the back link against the scene buffer behind it (the
+      // footer is white over the dark group photo, so it needs no readback).
+      // One throttled GPU→CPU sample per tick keeps stalls rare.
       inkClock.current += delta
       if (inkClock.current > 0.12) {
         inkClock.current = 0
-        const s = document.documentElement.style
-        const i = (inkIndex.current = (inkIndex.current + 1) % 3)
-        if (i === 0) s.setProperty('--about-back-ink', inkFor(bufferLuma(state.gl, buffer, 0.12, 0.93)))
-        else if (i === 1) s.setProperty('--about-bio-ink', inkFor(bufferLuma(state.gl, buffer, 0.12, 0.06)))
-        else s.setProperty('--about-signoff-ink', inkFor(bufferLuma(state.gl, buffer, 0.78, 0.04)))
+        document.documentElement.style.setProperty(
+          '--about-back-ink',
+          inkFor(bufferLuma(state.gl, buffer, 0.12, 0.93))
+        )
       }
     }
   })

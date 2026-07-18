@@ -45,47 +45,32 @@
   line-height: 1.5;
 }
 
-/* Pin the footer chrome to the bottom of the visible viewport (the bottom of
-   the group photo), clearing the iOS home indicator via the safe-area inset.
-   The bio block sits a line higher than the sign-off so the long second line
-   can't collide with "Designed with Love" on narrow screens. */
+/* Touch footer. Fixed to the viewport but:
+   - lifted above the iOS Safari bottom toolbar by --about-vv-inset, measured
+     from the visualViewport API (set in AboutOverlay) — vh/dvh/inset:0 all
+     resolve wrong under that toolbar, so the footer kept landing under it;
+   - revealed only near the end of the scroll via --about-footer-shown (set
+     per frame from scroll offset in LensScene) so it appears over the group
+     photo at the bottom instead of following the whole page.
+   Bio sits a line higher than the sign-off so the long "From Accra…" line
+   can't collide with "Designed with Love" on a narrow screen. */
+html.touch .about-bio-lines,
+html.touch .about-signoff {
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+  opacity: var(--about-footer-shown, 0);
+}
 html.touch .about-bio-lines {
-  bottom: calc(52px + env(safe-area-inset-bottom));
+  bottom: calc(var(--about-vv-inset, 0px) + 52px + env(safe-area-inset-bottom));
   left: 24px;
 }
 html.touch .about-signoff {
-  bottom: calc(20px + env(safe-area-inset-bottom));
+  bottom: calc(var(--about-vv-inset, 0px) + 20px + env(safe-area-inset-bottom));
   right: 24px;
 }
 html.touch .about-back {
   top: calc(20px + env(safe-area-inset-top));
   left: 24px;
-}
-
-/* Touch footer, anchored in the scroll content at the bottom of the last page
-   (the group photo) rather than fixed over the viewport. Absolute + top/left 0
-   so the two lines position independently of each other and of the bio card;
-   translateY places them near the end of the scroll (calibrated so at max
-   scroll they sit at the bottom of the group photo). */
-.about-bio-lines-end,
-.about-signoff-end {
-  position: absolute;
-  top: 0;
-  left: 0;
-  color: #fff;
-  font-size: 13px;
-  white-space: nowrap;
-  pointer-events: none;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.55);
-}
-.about-bio-lines-end {
-  transform: translate3d(24px, 280vh, 0);
-  line-height: 1.9;
-}
-/* A line lower than the bio block so the long "From Accra…" line and this one
-   don't collide horizontally on a narrow screen. */
-.about-signoff-end {
-  transform: translate3d(calc(100vw - 100% - 24px), 289vh, 0);
 }
 
 /* Touch bio card: real frosted glass. backdrop-filter blurs the WebGL canvas
@@ -123,13 +108,5 @@ html.touch .about-back {
    Touch only; desktop keeps the plain black text above. */
 html.touch .about-back {
   color: var(--about-back-ink, #000);
-  transition: color 0.25s ease;
-}
-html.touch .about-bio-lines {
-  color: var(--about-bio-ink, #000);
-  transition: color 0.25s ease;
-}
-html.touch .about-signoff {
-  color: var(--about-signoff-ink, #000);
   transition: color 0.25s ease;
 }
