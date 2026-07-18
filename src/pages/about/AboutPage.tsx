@@ -16,7 +16,13 @@ const BIO_COPY =
 export function AboutPage() {
   return (
     <>
-      <SceneCanvasLayout camera={{ position: [0, 0, 20], fov: 15 }} backdrop="#d8d7d7">
+      <SceneCanvasLayout
+        camera={{ position: [0, 0, 20], fov: 15 }}
+        backdrop="#d8d7d7"
+        // Two transmission materials (lens + glass card) are GPU-heavy; cap the
+        // pixel ratio on phones so it stays smooth. Desktop keeps full clarity.
+        dpr={IS_TOUCH ? [1, 1.5] : [1, 2]}
+      >
         <ScrollControls damping={0.2} pages={3} distance={0.5}>
           <Lens glassText={IS_TOUCH ? BIO_COPY : undefined}>
             <Scroll>

@@ -10,16 +10,19 @@ export function SceneCanvasLayout({
   children,
   camera = DEFAULT_CAMERA,
   backdrop,
+  dpr = [1, 2],
 }: {
   children: ReactNode
   camera?: CameraProps
   /** Page color behind the canvas — visible during the canvas fade-in. */
   backdrop?: string
+  /** Device-pixel-ratio clamp; lower the cap on GPU-heavy pages/devices. */
+  dpr?: [number, number]
 }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: backdrop }}>
       <Canvas
-        dpr={[1, 2]}
+        dpr={dpr}
         camera={camera}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
       >

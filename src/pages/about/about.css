@@ -57,13 +57,20 @@ html.touch .about-back {
   left: 24px;
 }
 
-/* Auto-contrast the chrome text against whatever image scrolls behind it:
-   white ink + difference blend renders dark on the light backdrop and flips
-   to light over dark photos, so it stays readable everywhere. Touch only —
-   desktop keeps the plain black text above. */
-html.touch .about-back,
-html.touch .about-bio-lines,
+/* Auto-contrast the chrome text against whatever image scrolls behind it.
+   Ink vars are set per-frame from a luminance readback of the scene buffer
+   (see LensScene bufferLuma) — mix-blend-mode can't blend over a WebGL canvas
+   in Safari. Default to black for the light backdrop before the first sample.
+   Touch only; desktop keeps the plain black text above. */
+html.touch .about-back {
+  color: var(--about-back-ink, #000);
+  transition: color 0.25s ease;
+}
+html.touch .about-bio-lines {
+  color: var(--about-bio-ink, #000);
+  transition: color 0.25s ease;
+}
 html.touch .about-signoff {
-  color: #fff;
-  mix-blend-mode: difference;
+  color: var(--about-signoff-ink, #000);
+  transition: color 0.25s ease;
 }

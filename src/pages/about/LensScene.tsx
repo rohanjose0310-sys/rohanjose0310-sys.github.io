@@ -24,6 +24,23 @@ const TRIP4 = '/about/trip4.jpg'
 // into the top-right corner without covering half the screen.
 const LENS_SCALE = IS_TOUCH ? 0.15 : 0.25
 
+// Footer chrome auto-contrast (touch). mix-blend-mode can't blend over a WebGL
+// canvas in Safari (it composites the canvas on its own layer), so instead we
+// read the luminance of the scene buffer directly behind each chrome element
+// and set its ink to black or white. Reused scratch buffer for the readback.
+const _inkPx = new Uint8Array(8 * 8 * 4)
+function bufferLuma(gl: THREE.WebGLRenderer, rt: THREE.WebGLRenderTarget, fx: number, fy: number) {
+  // fx/fy are 0..1 across the buffer, origin bottom-left (WebGL convention).
+  const S = 8
+  const x = Math.max(0, Math.min(rt.width - S, Math.round(fx * rt.width - S / 2)))
+  const y = Math.max(0, Math.min(rt.height - S, Math.round(fy * rt.height - S / 2)))
+  gl.readRenderTargetPixels(rt, x, y, S, S, _inkPx)
+  let sum = 0
+  for (let i = 0; i < S * S; i++) sum += 0.299 * _inkPx[i * 4] + 0.587 * _inkPx[i * 4 + 1] + 0.114 * _inkPx[i * 4 + 2]
+  return sum / (S * S)
+}
+const inkFor = (luma: number) => (luma < 140 ? '#fff' : '#000')
+
 export function Lens({
   children,
   damping = 0.15,
@@ -42,6 +59,10 @@ export function Lens({
   // Touch: the lens rests top-right; dragging it follows the finger, and on
   // release it eases back home (Preview-app magnifier behavior).
   const dragging = useRef(false)
+  // Throttle accumulator + round-robin cursor for the footer auto-contrast
+  // readback (touch only) — one small GPU→CPU read per tick keeps stalls rare.
+  const inkClock = useRef(0)
+  const inkIndex = useRef(0)
   const lensRadius = useMemo(() => {
     // Radius of the screen-facing circular face (bbox x-extent), not the
     // bounding sphere — that would also include the cylinder's height.
@@ -96,6 +117,21 @@ export function Lens({
     state.gl.setClearColor('#d8d7d7')
     state.gl.render(scene, state.camera)
     state.gl.setRenderTarget(null)
+
+    // Auto-contrast the footer/back chrome against the freshly-rendered scene
+    // buffer behind it. One sample per tick, round-robined across the three
+    // chrome spots (~each refreshes 2-3x/sec) so the readback stall stays rare.
+    if (IS_TOUCH) {
+      inkClock.current += delta
+      if (inkClock.current > 0.12) {
+        inkClock.current = 0
+        const s = document.documentElement.style
+        const i = (inkIndex.current = (inkIndex.current + 1) % 3)
+        if (i === 0) s.setProperty('--about-back-ink', inkFor(bufferLuma(state.gl, buffer, 0.12, 0.93)))
+        else if (i === 1) s.setProperty('--about-bio-ink', inkFor(bufferLuma(state.gl, buffer, 0.12, 0.06)))
+        else s.setProperty('--about-signoff-ink', inkFor(bufferLuma(state.gl, buffer, 0.78, 0.04)))
+      }
+    }
   })
   return (
     <>
@@ -117,53 +153,39 @@ export function Lens({
   )
 }
 
+// Fraction of the full scroll over which the card crosses the screen. Larger
+// = slower drift = the card lingers longer in view (it was whipping past
+// because, sitting at z=15 near the camera, it moved ~4x faster on screen
+// than the 1:1 background content).
+const CARD_SCROLL_SPAN = 0.62
+// Scroll offset at which the card is vertically centred / most readable.
+const CARD_SCROLL_CENTER = 0.5
+
 // Touch-only intro card: a slab of the same transmission glass as the lens,
 // refracting whatever images sit behind it, with the bio copy on top. Lives
 // in the main scene (not the scrolled portal, so its buffer sampling can't
-// feed back into itself) but is hand-positioned to scroll in lockstep with
-// the portal's Images/Typography, using the identical translateY formula
-// drei's <Scroll> group uses internally — so it only appears at its own
-// spot (around the "hand holding phone" photo) and scrolls away like any
-// other page element, instead of floating fixed over the whole page.
+// feed back into itself). It's driven directly by the (already-damped) scroll
+// offset so it enters from the bottom, dwells centre-screen while readable,
+// and exits the top — appearing only at its own spot instead of floating
+// fixed over the whole page.
 function GlassCard({ buffer, text }: { buffer: THREE.Texture; text: string }) {
   const group = useRef<THREE.Group>(null!)
   const scroll = useScroll()
-  // Default (z=0) viewport height — the same reference drei's <Scroll> group
-  // uses to convert scroll offset into a world-space translateY, so this
-  // card tracks Images/Typography exactly instead of drifting out of sync.
-  const pageHeight = useThree((state) => state.viewport.height)
-  const cardViewport = useThree((state) => state.viewport.getCurrentViewport(state.camera, [0, 0, 15]))
-  // Authored (pre-scroll) position: sits just below the img8/trip4 photo
-  // row (Images() places those at y = -pageHeight), matching where the old
-  // desktop paragraph appeared alongside that photo.
-  const localY = -pageHeight * 1.05
-  // Only drift while a finger is down, then ease back to centre on release —
-  // mirrors the reference profile photo, which returns home when the cursor
-  // leaves. Without this the card would stick at the last touch point.
-  const active = useRef(false)
-  useEffect(() => {
-    const down = () => (active.current = true)
-    const up = () => (active.current = false)
-    window.addEventListener('pointerdown', down)
-    window.addEventListener('pointerup', up)
-    window.addEventListener('pointercancel', up)
-    return () => {
-      window.removeEventListener('pointerdown', down)
-      window.removeEventListener('pointerup', up)
-      window.removeEventListener('pointercancel', up)
-    }
-  }, [])
-  const vpW = cardViewport.width
-  const vpH = cardViewport.height
+  // World units at the card's depth z=15 are a fixed 0.25 of the z=0 viewport
+  // (camera z=20, so distance ratio 5/20); reading the stable z=0 viewport
+  // avoids re-rendering every frame and still tracks resizes.
+  const viewport = useThree((state) => state.viewport)
+  const vpW = viewport.width * 0.25
+  const vpH = viewport.height * 0.25
   const w = vpW * 0.86
   const h = vpH * 0.34
-  useFrame((state, delta) => {
-    const scrollY = pageHeight * (scroll.pages - 1) * scroll.offset
-    // Small pointer-driven parallax while touched, same feel as the resting
-    // position logic above.
-    const dx = active.current ? state.pointer.x * vpW * 0.05 : 0
-    const dy = active.current ? state.pointer.y * vpH * 0.035 : 0
-    easing.damp3(group.current.position, [dx, localY + scrollY + dy, 15], 0.35, delta)
+  // Screen-space travel per unit scroll: cross from fully below to fully above
+  // (vpH + h) over CARD_SCROLL_SPAN of the scroll.
+  const speed = (vpH + h) / CARD_SCROLL_SPAN
+  useFrame(() => {
+    // offset is already smoothed by ScrollControls, so set the position
+    // directly — no extra easing that would lag behind the finger.
+    group.current.position.set(0, (scroll.offset - CARD_SCROLL_CENTER) * speed, 15)
   })
   return (
     <group ref={group}>
@@ -174,9 +196,9 @@ function GlassCard({ buffer, text }: { buffer: THREE.Texture; text: string }) {
           thickness={0.6}
           anisotropy={0.1}
           chromaticAberration={0.03}
-          roughness={0.35}
-          samples={4}
-          resolution={256}
+          roughness={0.3}
+          samples={2}
+          resolution={128}
         />
       </RoundedBox>
       <Text
