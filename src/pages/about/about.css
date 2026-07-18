@@ -1,0 +1,76 @@
+/* About page chrome + scroll copy. Desktop values are byte-for-byte the old
+   inline styles; the html.touch overrides (flag set in src/lib/touch.ts) only
+   ever apply on touch devices, so desktop browsers are untouched. */
+
+.about-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  color: black;
+  font-size: 13px;
+}
+
+.about-back {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  color: black;
+  text-decoration: none;
+  pointer-events: all;
+}
+
+.about-bio-lines {
+  position: absolute;
+  bottom: 40px;
+  left: 40px;
+}
+
+.about-signoff {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+}
+
+/* Scroll-page paragraph ("Years in code, ..."). */
+.about-copy {
+  transform: translate3d(65vw, 192vh, 0);
+  color: black;
+  font-size: 15px;
+  max-width: 300px;
+  line-height: 1.5;
+}
+
+/* Stack the two footer lines so they can't collide on narrow screens. */
+html.touch .about-bio-lines {
+  bottom: 64px;
+  left: 24px;
+}
+html.touch .about-signoff {
+  bottom: 24px;
+  right: 24px;
+}
+html.touch .about-back {
+  top: 24px;
+  left: 24px;
+}
+
+/* Auto-contrast the chrome text against whatever image scrolls behind it.
+   Ink vars are set per-frame from a luminance readback of the scene buffer
+   (see LensScene bufferLuma) — mix-blend-mode can't blend over a WebGL canvas
+   in Safari. Default to black for the light backdrop before the first sample.
+   Touch only; desktop keeps the plain black text above. */
+html.touch .about-back {
+  color: var(--about-back-ink, #000);
+  transition: color 0.25s ease;
+}
+html.touch .about-bio-lines {
+  color: var(--about-bio-ink, #000);
+  transition: color 0.25s ease;
+}
+html.touch .about-signoff {
+  color: var(--about-signoff-ink, #000);
+  transition: color 0.25s ease;
+}
