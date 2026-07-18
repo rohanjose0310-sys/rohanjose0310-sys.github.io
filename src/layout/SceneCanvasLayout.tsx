@@ -20,7 +20,13 @@ export function SceneCanvasLayout({
   dpr?: [number, number]
 }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, background: backdrop }}>
+    // iOS Safari sizes `position: fixed; inset: 0` against the "small"
+    // viewport (stops short of its bottom toolbar) regardless of
+    // viewport-fit=cover. Explicit width/height in dvh (the viewport unit
+    // that tracks Safari's actual dynamic chrome) is what's needed for the
+    // canvas to genuinely reach the real screen edge instead of clipping.
+    // Harmless elsewhere — dvh equals vh wherever there's no dynamic chrome.
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh', background: backdrop }}>
       <Canvas
         dpr={dpr}
         camera={camera}
