@@ -49,6 +49,7 @@ export function Lens({
   damping?: number
 }) {
   const ref = useRef<THREE.Mesh>(null!)
+  // Decoder path is set globally to /draco/ (self-hosted) in src/lib/draco.ts.
   const { nodes } = useGLTF(LENS_MODEL)
   const buffer = useFBO()
   const viewport = useThree((state) => state.viewport)

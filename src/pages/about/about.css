@@ -62,6 +62,32 @@ html.touch .about-back {
   left: 24px;
 }
 
+/* Touch footer, anchored in the scroll content at the bottom of the last page
+   (the group photo) rather than fixed over the viewport. Absolute + top/left 0
+   so the two lines position independently of each other and of the bio card;
+   translateY places them near the end of the scroll (calibrated so at max
+   scroll they sit at the bottom of the group photo). */
+.about-bio-lines-end,
+.about-signoff-end {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #fff;
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.55);
+}
+.about-bio-lines-end {
+  transform: translate3d(24px, 280vh, 0);
+  line-height: 1.9;
+}
+/* A line lower than the bio block so the long "From Accra…" line and this one
+   don't collide horizontally on a narrow screen. */
+.about-signoff-end {
+  transform: translate3d(calc(100vw - 100% - 24px), 289vh, 0);
+}
+
 /* Touch bio card: real frosted glass. backdrop-filter blurs the WebGL canvas
    behind it (compositor-level, cheap) — unlike a flat translucent 3D panel,
    which just tinted the sharp scene pale white. Placed in <Scroll html> so it

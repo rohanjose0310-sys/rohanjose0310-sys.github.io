@@ -35,6 +35,20 @@ export function AboutPage() {
                 frosted where a flat translucent 3D panel just looked pale. */}
             <Scroll html>
               <div className={IS_TOUCH ? 'about-glass-card' : 'about-copy'}>{BIO_COPY}</div>
+              {/* Touch: the footer lines live in the scroll content, anchored
+                  at the bottom of the last page (the group photo) so you
+                  scroll down to reach them instead of them floating fixed
+                  over everything. Desktop keeps its fixed footer (below). */}
+              {IS_TOUCH && (
+                <>
+                  <div className="about-bio-lines-end">
+                    Coder to Designer
+                    <br />
+                    From Accra to Chicago to Melbourne
+                  </div>
+                  <div className="about-signoff-end">Designed with Love</div>
+                </>
+              )}
             </Scroll>
             {/** This is a helper that pre-emptively makes threejs aware of all geometries, textures etc
                  By default threejs will only process objects if they are "seen" by the camera leading
@@ -48,19 +62,25 @@ export function AboutPage() {
   )
 }
 
-// Static page chrome: back button top-left, bio lines bottom-left, sign-off bottom-right.
+// Static page chrome: back button top-left (always fixed). On desktop the bio
+// lines / sign-off are fixed here too; on touch they instead ride the scroll
+// content (see the Scroll html block above) so they sit at the end of the page.
 function AboutOverlay() {
   return (
     <div className="about-overlay">
       <Link to="/" className="about-back">
         ← back
       </Link>
-      <div className="about-bio-lines">
-        Coder to Designer
-        <br />
-        From Accra to Chicago to Melbourne
-      </div>
-      <div className="about-signoff">Designed with Love</div>
+      {!IS_TOUCH && (
+        <>
+          <div className="about-bio-lines">
+            Coder to Designer
+            <br />
+            From Accra to Chicago to Melbourne
+          </div>
+          <div className="about-signoff">Designed with Love</div>
+        </>
+      )}
     </div>
   )
 }
