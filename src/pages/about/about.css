@@ -3,17 +3,14 @@
    ever apply on touch devices, so desktop browsers are untouched. */
 
 .about-overlay {
+  /* Mirror the canvas layer exactly (position: fixed; inset: 0) so this
+     overlay fills the *visible* viewport on iOS Safari and the footer pins to
+     the bottom of the screen, following the scroll. Using top/bottom both 0
+     lets Safari size the height to the visible area; the 100dvh unit proved
+     unreliable here (footer floated into the middle of the photo). */
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   pointer-events: none;
-  width: 100%;
-  /* Dynamic viewport height: on iOS Safari a plain 100% resolves against the
-     tall (URL-bar-hidden) viewport, so bottom-anchored chrome landed below
-     the visible area and floated up into the middle of the photo. 100dvh
-     tracks the *visible* height, pinning the footer to the bottom of the
-     group photo / the bottom of the page. */
-  height: 100dvh;
   color: black;
   font-size: 13px;
 }
@@ -71,7 +68,12 @@ html.touch .about-back {
    rides the page scroll, appearing over the mid-page imagery. */
 .about-glass-card {
   position: relative;
-  transform: translate3d(6vw, 150vh, 0);
+  /* drei's <Scroll html> wraps children in a shrink-to-fit absolute div, so
+     margin auto can't center against the screen — position with viewport
+     units instead. calc(50vw - 50%) puts the card's centre at mid-viewport
+     (50% here is half the card's own width), centering it for any width up to
+     the max-width cap. translateY sets the vertical scroll position. */
+  transform: translate3d(calc(50vw - 50%), 150vh, 0);
   box-sizing: border-box;
   width: 78vw;
   max-width: 340px;
