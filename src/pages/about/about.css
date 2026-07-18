@@ -56,16 +56,14 @@ html.touch .about-back {
   top: 24px;
   left: 24px;
 }
-/* Keep the paragraph on-screen instead of hanging off the right edge, and
-   float it on a frosted chip so it stays readable over any photo behind it. */
-html.touch .about-copy {
-  transform: translate3d(8vw, 192vh, 0);
-  max-width: 78vw;
-  background: rgba(216, 215, 215, 0.82);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  padding: 14px 16px;
-  border-radius: 10px;
-  -webkit-user-select: none;
-  user-select: none;
+
+/* Auto-contrast the chrome text against whatever image scrolls behind it:
+   white ink + difference blend renders dark on the light backdrop and flips
+   to light over dark photos, so it stays readable everywhere. Touch only —
+   desktop keeps the plain black text above. */
+html.touch .about-back,
+html.touch .about-bio-lines,
+html.touch .about-signoff {
+  color: #fff;
+  mix-blend-mode: difference;
 }

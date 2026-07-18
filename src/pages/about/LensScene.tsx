@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal, useFrame, useThree } from '@react-three/fiber'
-import { useFBO, useGLTF, useScroll, Text, Image, MeshTransmissionMaterial } from '@react-three/drei'
+import { useFBO, useGLTF, useScroll, Text, Image, MeshTransmissionMaterial, RoundedBox } from '@react-three/drei'
 import { easing } from 'maath'
 // Touch devices get different lens + type behavior (drag/spring-back lens,
 // down-scaled typography). Desktop keeps the original pmndrs code paths.
@@ -24,7 +24,16 @@ const TRIP4 = '/about/trip4.jpg'
 // into the top-right corner without covering half the screen.
 const LENS_SCALE = IS_TOUCH ? 0.15 : 0.25
 
-export function Lens({ children, damping = 0.15 }: { children: ReactNode; damping?: number }) {
+export function Lens({
+  children,
+  damping = 0.15,
+  glassText,
+}: {
+  children: ReactNode
+  damping?: number
+  /** Touch only: intro copy shown on a fixed refractive glass card. */
+  glassText?: string
+}) {
   const ref = useRef<THREE.Mesh>(null!)
   const { nodes } = useGLTF(LENS_MODEL)
   const buffer = useFBO()
@@ -103,7 +112,75 @@ export function Lens({ children, damping = 0.15 }: { children: ReactNode; dampin
         onPointerDown={IS_TOUCH ? () => (dragging.current = true) : undefined}>
         <MeshTransmissionMaterial buffer={buffer.texture} ior={1.2} thickness={1.5} anisotropy={0.1} chromaticAberration={0.04} />
       </mesh>
+      {IS_TOUCH && glassText && <GlassCard buffer={buffer.texture} text={glassText} />}
     </>
+  )
+}
+
+// Touch-only intro card: a fixed slab of the same transmission glass as the
+// lens, refracting whatever images scroll behind it, with the bio copy on top.
+// The whole card drifts gently toward the pointer (à la the manupadmaraagam
+// profile photo) and eases back. Lives in the main scene (not the scrolled
+// portal), so it stays pinned to the viewport.
+function GlassCard({ buffer, text }: { buffer: THREE.Texture; text: string }) {
+  const group = useRef<THREE.Group>(null!)
+  const viewport = useThree((state) => state.viewport)
+  // Only drift while a finger is down, then ease back to centre on release —
+  // mirrors the reference profile photo, which returns home when the cursor
+  // leaves. Without this the card would stick at the last touch point.
+  const active = useRef(false)
+  useEffect(() => {
+    const down = () => (active.current = true)
+    const up = () => (active.current = false)
+    window.addEventListener('pointerdown', down)
+    window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', up)
+    return () => {
+      window.removeEventListener('pointerdown', down)
+      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', up)
+    }
+  }, [])
+  // Viewport (world units) at the card's depth z=15 is a fixed 0.25 of the
+  // z=0 viewport (camera z=20, so distance ratio 5/20), and tracks resizes.
+  const vpW = viewport.width * 0.25
+  const vpH = viewport.height * 0.25
+  const w = vpW * 0.86
+  const h = vpH * 0.34
+  useFrame((state, delta) => {
+    // Rest a little above centre; add a small pointer-driven parallax offset
+    // while touched.
+    const dx = active.current ? state.pointer.x * vpW * 0.05 : 0
+    const dy = active.current ? state.pointer.y * vpH * 0.035 : 0
+    easing.damp3(group.current.position, [dx, vpH * 0.06 + dy, 15], 0.35, delta)
+  })
+  return (
+    <group ref={group}>
+      <RoundedBox args={[w, h, 0.3]} radius={Math.min(w, h) * 0.14} smoothness={4}>
+        <MeshTransmissionMaterial
+          buffer={buffer}
+          ior={1.15}
+          thickness={0.6}
+          anisotropy={0.1}
+          chromaticAberration={0.03}
+          roughness={0.35}
+          samples={4}
+          resolution={256}
+        />
+      </RoundedBox>
+      <Text
+        font={INTER_FONT}
+        position={[0, 0, 0.2]}
+        fontSize={vpW * 0.05}
+        maxWidth={w * 0.86}
+        lineHeight={1.35}
+        letterSpacing={-0.02}
+        color="black"
+        anchorX="center"
+        anchorY="middle">
+        {text}
+      </Text>
+    </group>
   )
 }
 
