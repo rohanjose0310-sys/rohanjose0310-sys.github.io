@@ -148,7 +148,7 @@ export function Lens({
         onPointerDown={IS_TOUCH ? () => (dragging.current = true) : undefined}>
         <MeshTransmissionMaterial buffer={buffer.texture} ior={1.2} thickness={1.5} anisotropy={0.1} chromaticAberration={0.04} />
       </mesh>
-      {IS_TOUCH && glassText && <GlassCard buffer={buffer.texture} text={glassText} />}
+      {IS_TOUCH && glassText && <GlassCard text={glassText} />}
     </>
   )
 }
@@ -161,14 +161,18 @@ const CARD_SCROLL_SPAN = 0.62
 // Scroll offset at which the card is vertically centred / most readable.
 const CARD_SCROLL_CENTER = 0.5
 
-// Touch-only intro card: a slab of the same transmission glass as the lens,
-// refracting whatever images sit behind it, with the bio copy on top. Lives
-// in the main scene (not the scrolled portal, so its buffer sampling can't
-// feed back into itself). It's driven directly by the (already-damped) scroll
-// offset so it enters from the bottom, dwells centre-screen while readable,
-// and exits the top — appearing only at its own spot instead of floating
-// fixed over the whole page.
-function GlassCard({ buffer, text }: { buffer: THREE.Texture; text: string }) {
+// Touch-only intro card: a cheap frosted-glass slab — a plain translucent
+// panel, no texture sampling or refraction shader. MeshTransmissionMaterial
+// was the lag source when scrolling (a per-fragment multi-tap refraction/
+// chromatic-aberration/roughness-blur shader over the card's whole, large
+// on-screen area); ordinary alpha-blended transparency already lets the
+// scene behind it show through softly (the GPU composites that for free),
+// giving a convincing frosted look for close to zero extra cost. Lives in
+// the main scene (not the scrolled portal). It's driven directly by the
+// (already-damped) scroll offset so it enters from the bottom, dwells
+// centre-screen while readable, and exits the top — appearing only at its
+// own spot instead of floating fixed over the whole page.
+function GlassCard({ text }: { text: string }) {
   const group = useRef<THREE.Group>(null!)
   const scroll = useScroll()
   // World units at the card's depth z=15 are a fixed 0.25 of the z=0 viewport
@@ -190,16 +194,9 @@ function GlassCard({ buffer, text }: { buffer: THREE.Texture; text: string }) {
   return (
     <group ref={group}>
       <RoundedBox args={[w, h, 0.3]} radius={Math.min(w, h) * 0.14} smoothness={4}>
-        <MeshTransmissionMaterial
-          buffer={buffer}
-          ior={1.15}
-          thickness={0.6}
-          anisotropy={0.1}
-          chromaticAberration={0.03}
-          roughness={0.3}
-          samples={2}
-          resolution={128}
-        />
+        {/* depthWrite off — a semi-transparent box's own back/side faces
+            would otherwise show through the front face as a visible seam. */}
+        <meshBasicMaterial color="#e8e8e8" transparent opacity={0.68} depthWrite={false} toneMapped={false} />
       </RoundedBox>
       <Text
         font={INTER_FONT}
