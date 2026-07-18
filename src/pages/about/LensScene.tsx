@@ -1,8 +1,11 @@
 import * as THREE from 'three'
-import { useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal, useFrame, useThree } from '@react-three/fiber'
 import { useFBO, useGLTF, useScroll, Text, Image, MeshTransmissionMaterial } from '@react-three/drei'
 import { easing } from 'maath'
+// Touch devices get different lens + type behavior (drag/spring-back lens,
+// down-scaled typography). Desktop keeps the original pmndrs code paths.
+import { IS_TOUCH } from '../../lib/touch'
 
 // Faithful TS port of pmndrs/examples "scrollcontrols-and-lens-refraction".
 // Assets live in public/about/ (swapped for real content later).
@@ -17,24 +20,65 @@ const IMG8 = '/about/img8.jpg'
 const TRIP2 = '/about/trip2.jpg'
 const TRIP4 = '/about/trip4.jpg'
 
+// Desktop keeps the pmndrs scale; phones get a smaller lens so it can tuck
+// into the top-right corner without covering half the screen.
+const LENS_SCALE = IS_TOUCH ? 0.15 : 0.25
+
 export function Lens({ children, damping = 0.15 }: { children: ReactNode; damping?: number }) {
   const ref = useRef<THREE.Mesh>(null!)
   const { nodes } = useGLTF(LENS_MODEL)
   const buffer = useFBO()
   const viewport = useThree((state) => state.viewport)
   const [scene] = useState(() => new THREE.Scene())
+  // Touch: the lens rests top-right; dragging it follows the finger, and on
+  // release it eases back home (Preview-app magnifier behavior).
+  const dragging = useRef(false)
+  const lensRadius = useMemo(() => {
+    // Radius of the screen-facing circular face (bbox x-extent), not the
+    // bounding sphere — that would also include the cylinder's height.
+    const geometry = (nodes.Cylinder as THREE.Mesh).geometry
+    if (!geometry.boundingBox) geometry.computeBoundingBox()
+    const box = geometry.boundingBox ?? new THREE.Box3(new THREE.Vector3(-1, -1, -1), new THREE.Vector3(1, 1, 1))
+    return ((box.max.x - box.min.x) / 2) * LENS_SCALE
+  }, [nodes])
+  useEffect(() => {
+    if (!IS_TOUCH) return
+    const release = () => (dragging.current = false)
+    // While the lens is held, swallow touchmove so the page doesn't scroll.
+    const blockScroll = (e: TouchEvent) => {
+      if (dragging.current) e.preventDefault()
+    }
+    window.addEventListener('pointerup', release)
+    window.addEventListener('pointercancel', release)
+    window.addEventListener('touchmove', blockScroll, { passive: false })
+    return () => {
+      window.removeEventListener('pointerup', release)
+      window.removeEventListener('pointercancel', release)
+      window.removeEventListener('touchmove', blockScroll)
+    }
+  }, [])
   useFrame((state, delta) => {
     // Tie lens to the pointer
     // getCurrentViewport gives us the width & height that would fill the screen in threejs units
     // By giving it a target coordinate we can offset these bounds, for instance width/height for a plane that
     // sits 15 units from 0/0/0 towards the camera (which is where the lens is)
     const viewport = state.viewport.getCurrentViewport(state.camera, [0, 0, 15])
-    easing.damp3(
-      ref.current.position,
-      [(state.pointer.x * viewport.width) / 2, (state.pointer.y * viewport.height) / 2, 15],
-      damping,
-      delta
-    )
+    if (IS_TOUCH && !dragging.current) {
+      const pad = viewport.height * 0.03
+      easing.damp3(
+        ref.current.position,
+        [viewport.width / 2 - lensRadius - pad, viewport.height / 2 - lensRadius - pad, 15],
+        0.4,
+        delta
+      )
+    } else {
+      easing.damp3(
+        ref.current.position,
+        [(state.pointer.x * viewport.width) / 2, (state.pointer.y * viewport.height) / 2, 15],
+        damping,
+        delta
+      )
+    }
     // This is entirely optional but spares us one extra render of the scene
     // The createPortal below will mount the children of <Lens> into the new THREE.Scene above
     // The following code will render that scene into a buffer, whose texture will then be fed into
@@ -51,7 +95,12 @@ export function Lens({ children, damping = 0.15 }: { children: ReactNode; dampin
         <planeGeometry />
         <meshBasicMaterial map={buffer.texture} />
       </mesh>
-      <mesh scale={0.25} ref={ref} rotation-x={Math.PI / 2} geometry={(nodes.Cylinder as THREE.Mesh).geometry}>
+      <mesh
+        scale={LENS_SCALE}
+        ref={ref}
+        rotation-x={Math.PI / 2}
+        geometry={(nodes.Cylinder as THREE.Mesh).geometry}
+        onPointerDown={IS_TOUCH ? () => (dragging.current = true) : undefined}>
         <MeshTransmissionMaterial buffer={buffer.texture} ior={1.2} thickness={1.5} anisotropy={0.1} chromaticAberration={0.04} />
       </mesh>
     </>
@@ -91,7 +140,10 @@ export function Images() {
 export function Typography() {
   const state = useThree()
   const { width, height } = state.viewport.getCurrentViewport(state.camera, [0, 0, 12])
-  const shared = { font: INTER_FONT, letterSpacing: -0.1, color: 'black' }
+  // Default fontSize is 1, tuned for desktop aspect ratios; on narrow touch
+  // screens "home" would overflow the viewport, so scale type to fit.
+  const fontSize = IS_TOUCH ? Math.min(1, width / 3) : 1
+  const shared = { font: INTER_FONT, letterSpacing: -0.1, color: 'black', fontSize }
   return (
     <>
       <Text children="to" anchorX="left" position={[-width / 2.5, -height / 10, 12]} {...shared} />
