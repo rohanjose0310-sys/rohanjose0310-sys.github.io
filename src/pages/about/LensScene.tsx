@@ -117,14 +117,26 @@ export function Lens({
   )
 }
 
-// Touch-only intro card: a fixed slab of the same transmission glass as the
-// lens, refracting whatever images scroll behind it, with the bio copy on top.
-// The whole card drifts gently toward the pointer (à la the manupadmaraagam
-// profile photo) and eases back. Lives in the main scene (not the scrolled
-// portal), so it stays pinned to the viewport.
+// Touch-only intro card: a slab of the same transmission glass as the lens,
+// refracting whatever images sit behind it, with the bio copy on top. Lives
+// in the main scene (not the scrolled portal, so its buffer sampling can't
+// feed back into itself) but is hand-positioned to scroll in lockstep with
+// the portal's Images/Typography, using the identical translateY formula
+// drei's <Scroll> group uses internally — so it only appears at its own
+// spot (around the "hand holding phone" photo) and scrolls away like any
+// other page element, instead of floating fixed over the whole page.
 function GlassCard({ buffer, text }: { buffer: THREE.Texture; text: string }) {
   const group = useRef<THREE.Group>(null!)
-  const viewport = useThree((state) => state.viewport)
+  const scroll = useScroll()
+  // Default (z=0) viewport height — the same reference drei's <Scroll> group
+  // uses to convert scroll offset into a world-space translateY, so this
+  // card tracks Images/Typography exactly instead of drifting out of sync.
+  const pageHeight = useThree((state) => state.viewport.height)
+  const cardViewport = useThree((state) => state.viewport.getCurrentViewport(state.camera, [0, 0, 15]))
+  // Authored (pre-scroll) position: sits just below the img8/trip4 photo
+  // row (Images() places those at y = -pageHeight), matching where the old
+  // desktop paragraph appeared alongside that photo.
+  const localY = -pageHeight * 1.05
   // Only drift while a finger is down, then ease back to centre on release —
   // mirrors the reference profile photo, which returns home when the cursor
   // leaves. Without this the card would stick at the last touch point.
@@ -141,18 +153,17 @@ function GlassCard({ buffer, text }: { buffer: THREE.Texture; text: string }) {
       window.removeEventListener('pointercancel', up)
     }
   }, [])
-  // Viewport (world units) at the card's depth z=15 is a fixed 0.25 of the
-  // z=0 viewport (camera z=20, so distance ratio 5/20), and tracks resizes.
-  const vpW = viewport.width * 0.25
-  const vpH = viewport.height * 0.25
+  const vpW = cardViewport.width
+  const vpH = cardViewport.height
   const w = vpW * 0.86
   const h = vpH * 0.34
   useFrame((state, delta) => {
-    // Rest a little above centre; add a small pointer-driven parallax offset
-    // while touched.
+    const scrollY = pageHeight * (scroll.pages - 1) * scroll.offset
+    // Small pointer-driven parallax while touched, same feel as the resting
+    // position logic above.
     const dx = active.current ? state.pointer.x * vpW * 0.05 : 0
     const dy = active.current ? state.pointer.y * vpH * 0.035 : 0
-    easing.damp3(group.current.position, [dx, vpH * 0.06 + dy, 15], 0.35, delta)
+    easing.damp3(group.current.position, [dx, localY + scrollY + dy, 15], 0.35, delta)
   })
   return (
     <group ref={group}>
