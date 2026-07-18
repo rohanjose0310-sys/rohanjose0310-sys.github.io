@@ -43,18 +43,22 @@
   line-height: 1.5;
 }
 
-/* Stack the two footer lines so they can't collide on narrow screens. */
+/* Stack the two footer lines so they can't collide on narrow screens.
+   Padded by env(safe-area-inset-*) so, now that the canvas bleeds under the
+   iOS home indicator / notch (viewport-fit=cover in index.html), this text
+   doesn't end up sitting in that gesture area or under the notch. Resolves
+   to 0 on non-notch devices, so this is a no-op there. */
 html.touch .about-bio-lines {
-  bottom: 64px;
-  left: 24px;
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  left: calc(24px + env(safe-area-inset-left, 0px));
 }
 html.touch .about-signoff {
-  bottom: 24px;
-  right: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  right: calc(24px + env(safe-area-inset-right, 0px));
 }
 html.touch .about-back {
-  top: 24px;
-  left: 24px;
+  top: calc(24px + env(safe-area-inset-top, 0px));
+  left: calc(24px + env(safe-area-inset-left, 0px));
 }
 
 /* Auto-contrast the chrome text against whatever image scrolls behind it.
