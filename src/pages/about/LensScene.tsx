@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal, useFrame, useThree } from '@react-three/fiber'
-import { useFBO, useGLTF, useScroll, Text, Image, MeshTransmissionMaterial, RoundedBox } from '@react-three/drei'
+import { useFBO, useGLTF, useScroll, Text, Image, MeshTransmissionMaterial } from '@react-three/drei'
 import { easing } from 'maath'
 // Touch devices get different lens + type behavior (drag/spring-back lens,
 // down-scaled typography). Desktop keeps the original pmndrs code paths.
@@ -44,12 +44,9 @@ const inkFor = (luma: number) => (luma < 140 ? '#fff' : '#000')
 export function Lens({
   children,
   damping = 0.15,
-  glassText,
 }: {
   children: ReactNode
   damping?: number
-  /** Touch only: intro copy shown on a fixed refractive glass card. */
-  glassText?: string
 }) {
   const ref = useRef<THREE.Mesh>(null!)
   const { nodes } = useGLTF(LENS_MODEL)
@@ -148,69 +145,7 @@ export function Lens({
         onPointerDown={IS_TOUCH ? () => (dragging.current = true) : undefined}>
         <MeshTransmissionMaterial buffer={buffer.texture} ior={1.2} thickness={1.5} anisotropy={0.1} chromaticAberration={0.04} />
       </mesh>
-      {IS_TOUCH && glassText && <GlassCard text={glassText} />}
     </>
-  )
-}
-
-// Fraction of the full scroll over which the card crosses the screen. Larger
-// = slower drift = the card lingers longer in view (it was whipping past
-// because, sitting at z=15 near the camera, it moved ~4x faster on screen
-// than the 1:1 background content).
-const CARD_SCROLL_SPAN = 0.62
-// Scroll offset at which the card is vertically centred / most readable.
-const CARD_SCROLL_CENTER = 0.5
-
-// Touch-only intro card: a cheap frosted-glass slab — a plain translucent
-// panel, no texture sampling or refraction shader. MeshTransmissionMaterial
-// was the lag source when scrolling (a per-fragment multi-tap refraction/
-// chromatic-aberration/roughness-blur shader over the card's whole, large
-// on-screen area); ordinary alpha-blended transparency already lets the
-// scene behind it show through softly (the GPU composites that for free),
-// giving a convincing frosted look for close to zero extra cost. Lives in
-// the main scene (not the scrolled portal). It's driven directly by the
-// (already-damped) scroll offset so it enters from the bottom, dwells
-// centre-screen while readable, and exits the top — appearing only at its
-// own spot instead of floating fixed over the whole page.
-function GlassCard({ text }: { text: string }) {
-  const group = useRef<THREE.Group>(null!)
-  const scroll = useScroll()
-  // World units at the card's depth z=15 are a fixed 0.25 of the z=0 viewport
-  // (camera z=20, so distance ratio 5/20); reading the stable z=0 viewport
-  // avoids re-rendering every frame and still tracks resizes.
-  const viewport = useThree((state) => state.viewport)
-  const vpW = viewport.width * 0.25
-  const vpH = viewport.height * 0.25
-  const w = vpW * 0.86
-  const h = vpH * 0.34
-  // Screen-space travel per unit scroll: cross from fully below to fully above
-  // (vpH + h) over CARD_SCROLL_SPAN of the scroll.
-  const speed = (vpH + h) / CARD_SCROLL_SPAN
-  useFrame(() => {
-    // offset is already smoothed by ScrollControls, so set the position
-    // directly — no extra easing that would lag behind the finger.
-    group.current.position.set(0, (scroll.offset - CARD_SCROLL_CENTER) * speed, 15)
-  })
-  return (
-    <group ref={group}>
-      <RoundedBox args={[w, h, 0.3]} radius={Math.min(w, h) * 0.14} smoothness={4}>
-        {/* depthWrite off — a semi-transparent box's own back/side faces
-            would otherwise show through the front face as a visible seam. */}
-        <meshBasicMaterial color="#e8e8e8" transparent opacity={0.68} depthWrite={false} toneMapped={false} />
-      </RoundedBox>
-      <Text
-        font={INTER_FONT}
-        position={[0, 0, 0.2]}
-        fontSize={vpW * 0.05}
-        maxWidth={w * 0.86}
-        lineHeight={1.35}
-        letterSpacing={-0.02}
-        color="white"
-        anchorX="center"
-        anchorY="middle">
-        {text}
-      </Text>
-    </group>
   )
 }
 

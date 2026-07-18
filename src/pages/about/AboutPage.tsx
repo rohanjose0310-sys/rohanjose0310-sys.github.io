@@ -24,18 +24,18 @@ export function AboutPage() {
         dpr={IS_TOUCH ? [1, 1.5] : [1, 2]}
       >
         <ScrollControls damping={0.2} pages={3} distance={0.5}>
-          <Lens glassText={IS_TOUCH ? BIO_COPY : undefined}>
+          <Lens>
             <Scroll>
               <Typography />
               <Images />
             </Scroll>
-            {/* Desktop: bio scrolls in as an HTML overlay (unchanged). On touch
-                the same copy rides the fixed 3D glass card instead. */}
-            {!IS_TOUCH && (
-              <Scroll html>
-                <div className="about-copy">{BIO_COPY}</div>
-              </Scroll>
-            )}
+            {/* Bio copy scrolls in as an HTML overlay. Desktop keeps the plain
+                black text; touch gets a real frosted-glass card (a backdrop
+                blur over the canvas — see .about-glass-card), which reads as
+                frosted where a flat translucent 3D panel just looked pale. */}
+            <Scroll html>
+              <div className={IS_TOUCH ? 'about-glass-card' : 'about-copy'}>{BIO_COPY}</div>
+            </Scroll>
             {/** This is a helper that pre-emptively makes threejs aware of all geometries, textures etc
                  By default threejs will only process objects if they are "seen" by the camera leading
                  to jank as you scroll down. With <Preload> that's solved.  */}

@@ -3,12 +3,17 @@
    ever apply on touch devices, so desktop browsers are untouched. */
 
 .about-overlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   pointer-events: none;
   width: 100%;
-  height: 100%;
+  /* Dynamic viewport height: on iOS Safari a plain 100% resolves against the
+     tall (URL-bar-hidden) viewport, so bottom-anchored chrome landed below
+     the visible area and floated up into the middle of the photo. 100dvh
+     tracks the *visible* height, pinning the footer to the bottom of the
+     group photo / the bottom of the page. */
+  height: 100dvh;
   color: black;
   font-size: 13px;
 }
@@ -43,18 +48,44 @@
   line-height: 1.5;
 }
 
-/* Stack the two footer lines so they can't collide on narrow screens. */
+/* Pin the footer chrome to the bottom of the visible viewport (the bottom of
+   the group photo), clearing the iOS home indicator via the safe-area inset.
+   The bio block sits a line higher than the sign-off so the long second line
+   can't collide with "Designed with Love" on narrow screens. */
 html.touch .about-bio-lines {
-  bottom: 64px;
+  bottom: calc(52px + env(safe-area-inset-bottom));
   left: 24px;
 }
 html.touch .about-signoff {
-  bottom: 24px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
   right: 24px;
 }
 html.touch .about-back {
-  top: 24px;
+  top: calc(20px + env(safe-area-inset-top));
   left: 24px;
+}
+
+/* Touch bio card: real frosted glass. backdrop-filter blurs the WebGL canvas
+   behind it (compositor-level, cheap) — unlike a flat translucent 3D panel,
+   which just tinted the sharp scene pale white. Placed in <Scroll html> so it
+   rides the page scroll, appearing over the mid-page imagery. */
+.about-glass-card {
+  position: relative;
+  transform: translate3d(6vw, 150vh, 0);
+  box-sizing: border-box;
+  width: 78vw;
+  max-width: 340px;
+  padding: 22px 20px;
+  border-radius: 20px;
+  color: #fff;
+  font-size: 16px;
+  line-height: 1.55;
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.28);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
 }
 
 /* Auto-contrast the chrome text against whatever image scrolls behind it.
