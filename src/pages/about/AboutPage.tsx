@@ -3,6 +3,7 @@ import { Preload, Scroll, ScrollControls } from '@react-three/drei'
 import { SceneCanvasLayout } from '../../layout/SceneCanvasLayout'
 import { Images, Lens, Typography } from './LensScene'
 import { IS_TOUCH } from '../../lib/touch'
+import { useIosScrollBleed } from '../../lib/iosScrollBleed'
 import './about.css'
 
 const BIO_COPY =
@@ -14,6 +15,7 @@ const BIO_COPY =
 // images + typography, viewed through a pointer-tracked refractive lens.
 // Copy text and images are demo placeholders (replaced with real content later).
 export function AboutPage() {
+  useIosScrollBleed()
   return (
     <>
       <SceneCanvasLayout
