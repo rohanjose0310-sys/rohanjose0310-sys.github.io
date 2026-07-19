@@ -6,10 +6,11 @@ import { useLocation } from 'react-router-dom'
 const DARK_BACKDROP_ROUTES = ['/projects', '/resume']
 
 // Routes that place the mark inline themselves — next to "Rohan Jose" (see
-// HeroText, ContactPage, models/Overlay), or below the back button on About
-// (see about/AboutPage's AdaptiveMark usage) — the corner-fixed <Logo/> below
-// stays out of the way on those routes.
-const INLINE_MARK_ROUTES = ['/', '/contact', '/models', '/about']
+// HeroText, ContactPage, models/Overlay), below the back button on About (see
+// about/AboutPage's AdaptiveMark usage), or centered as a hero mark on Resume
+// (see resume/ResumePage) — the corner-fixed <Logo/> below stays out of the
+// way on those routes.
+const INLINE_MARK_ROUTES = ['/', '/contact', '/models', '/about', '/resume']
 
 // Aspect ratio of the source PNGs (225x74 / 226x74) — used to size the
 // two-image stack in AdaptiveMark without waiting on image load.
@@ -74,10 +75,10 @@ export function AdaptiveMark({ height, style }: { height: number; style?: CSSPro
   )
 }
 
-// Fixed corner mark for pages with no adjacent name text (Projects, Resume).
-// Color is chosen per-route rather than via mix-blend-mode: blend modes
-// don't composite over a WebGL canvas in iOS Safari (see memory
-// safari-blend-over-webgl), and both pages have one known, static backdrop
+// Fixed corner mark for pages with no adjacent name text (currently just
+// Projects). Color is chosen per-route rather than via mix-blend-mode: blend
+// modes don't composite over a WebGL canvas in iOS Safari (see memory
+// safari-blend-over-webgl), and the page has one known, static backdrop
 // color rather than a multi-toned scroll.
 export function Logo() {
   const { pathname } = useLocation()
