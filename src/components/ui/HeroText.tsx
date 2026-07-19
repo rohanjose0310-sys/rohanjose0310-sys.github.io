@@ -15,7 +15,9 @@ export function HeroText() {
       <h1
         style={{
           position: 'absolute',
-          top: 40,
+          // env() is 0 outside viewport-fit=cover contexts (desktop included);
+          // on iOS it keeps the title clear of the status bar / Dynamic Island
+          top: 'calc(40px + env(safe-area-inset-top))',
           left: 40,
           margin: 0,
           fontSize: '1rem',
@@ -31,7 +33,7 @@ export function HeroText() {
       <div
         style={{
           position: 'absolute',
-          bottom: 40,
+          bottom: 'calc(40px + env(safe-area-inset-bottom))',
           left: 40,
           fontSize: '13px',
           opacity: 0.65,

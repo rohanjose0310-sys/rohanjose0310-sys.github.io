@@ -20,7 +20,7 @@ export function SceneCanvasLayout({
   dpr?: [number, number]
 }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, background: backdrop }}>
+    <div className="scene-layer" style={{ background: backdrop }}>
       <Canvas
         dpr={dpr}
         camera={camera}

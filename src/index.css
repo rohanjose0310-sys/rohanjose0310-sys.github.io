@@ -38,6 +38,26 @@ body {
     auto;
 }
 
+/* Full-bleed canvas layer (all 3D pages). Default is the classic fixed
+   full-viewport cover. On touch, `inset: 0` is the reason for the white/black
+   bars: it binds to iOS Safari's LAYOUT viewport — the area between the
+   status bar and the toolbar — so the scene stops at those edges and Safari
+   paints the leftover strips with the page background. 100lvh (the "large
+   viewport" unit) spans the entire screen regardless of toolbar state, and
+   with viewport-fit=cover (index.html) the origin is the true screen top —
+   so the scene renders edge-to-edge, showing through Safari's translucent
+   bars exactly like a document-scrolling page does. Desktop: lvh == vh ==
+   the normal viewport, and this block is touch-scoped anyway. */
+.scene-layer {
+  position: fixed;
+  inset: 0;
+}
+html.touch .scene-layer {
+  bottom: auto;
+  height: 100vh; /* fallback where lvh is unsupported */
+  height: 100lvh;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

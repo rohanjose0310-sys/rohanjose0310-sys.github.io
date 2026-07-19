@@ -13,6 +13,20 @@
   cursor: auto;
 }
 
+/* Full-bleed on touch, same as .scene-layer in index.css: span the large
+   viewport so the scene renders under Safari's translucent bars instead of
+   leaving background strips above/below. */
+html.touch .frosted {
+  bottom: auto;
+  height: 100vh;
+  height: 100lvh;
+}
+/* Keep the model menu clear of the status bar / Dynamic Island now that the
+   page bleeds to the screen top (env() is 0 without viewport-fit=cover). */
+html.touch .frosted .model-menu {
+  top: calc(24px + env(safe-area-inset-top));
+}
+
 .frosted a {
   pointer-events: all;
   color: black;

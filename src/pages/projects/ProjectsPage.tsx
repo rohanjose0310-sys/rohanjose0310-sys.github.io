@@ -33,7 +33,7 @@ function Effects() {
 export function ProjectsPage() {
   return (
     <>
-      <div style={{ position: 'fixed', inset: 0, background: 'black' }}>
+      <div className="scene-layer" style={{ background: 'black' }}>
         <Canvas orthographic gl={{ antialias: false }} camera={{ position: [0, 0, 100], zoom: 60 }}>
           <color attach="background" args={['black']} />
           <FitZoom />
