@@ -19,9 +19,15 @@
   position: absolute;
   top: 40px;
   left: 40px;
-  color: black;
   text-decoration: none;
   pointer-events: all;
+}
+
+.about-logo {
+  position: absolute;
+  top: 72px;
+  left: 40px;
+  pointer-events: none;
 }
 
 .about-bio-lines {
@@ -72,6 +78,10 @@ html.touch .about-back {
   top: calc(20px + env(safe-area-inset-top));
   left: 24px;
 }
+html.touch .about-logo {
+  top: calc(52px + env(safe-area-inset-top));
+  left: 24px;
+}
 
 /* Touch bio card: real frosted glass. backdrop-filter blurs the WebGL canvas
    behind it (compositor-level, cheap) — unlike a flat translucent 3D panel,
@@ -101,12 +111,13 @@ html.touch .about-back {
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
 }
 
-/* Auto-contrast the chrome text against whatever image scrolls behind it.
-   Ink vars are set per-frame from a luminance readback of the scene buffer
-   (see LensScene bufferLuma) — mix-blend-mode can't blend over a WebGL canvas
-   in Safari. Default to black for the light backdrop before the first sample.
-   Touch only; desktop keeps the plain black text above. */
-html.touch .about-back {
+/* Auto-contrast the back button against whatever image scrolls behind it.
+   Ink var is set per-frame from a luminance readback of the scene buffer (see
+   LensScene bufferLuma) — mix-blend-mode can't blend over a WebGL canvas in
+   Safari. Default to black for the light backdrop before the first sample.
+   Runs on both desktop and touch (the logo mark next to it crossfades the
+   same way via --about-logo-ink; see Logo.tsx AdaptiveMark). */
+.about-back {
   color: var(--about-back-ink, #000);
   transition: color 0.25s ease;
 }

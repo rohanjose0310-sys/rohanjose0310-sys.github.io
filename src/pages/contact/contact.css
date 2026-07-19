@@ -25,6 +25,9 @@
 .contact-page .corner.left {
   left: 2.5rem;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .contact-page .back-link {

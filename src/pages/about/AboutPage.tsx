@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Preload, Scroll, ScrollControls } from '@react-three/drei'
 import { SceneCanvasLayout } from '../../layout/SceneCanvasLayout'
+import { AdaptiveMark } from '../../components/ui/Logo'
 import { Images, Lens, Typography } from './LensScene'
 import { IS_TOUCH } from '../../lib/touch'
 import './about.css'
@@ -84,6 +85,9 @@ function AboutOverlay() {
       <Link to="/" className="about-back">
         ← back
       </Link>
+      <div className="about-logo">
+        <AdaptiveMark height={19.5} />
+      </div>
       <div className="about-bio-lines">
         Coder to Designer
         <br />

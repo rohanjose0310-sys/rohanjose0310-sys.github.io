@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { Leva } from 'leva'
 import { DEBUG } from '../lib/debug'
 import { useLenis } from '../lib/lenis'
+import { Logo } from '../components/ui/Logo'
 
 // Persistent app chrome: one Lenis smooth-scroll instance for the whole app;
 // pages render through <Outlet/>. Lenis is disabled on routes that scroll via
@@ -14,6 +15,7 @@ export function RootLayout() {
   return (
     <>
       <Leva hidden={!DEBUG} collapsed />
+      <Logo />
       <Outlet />
     </>
   )

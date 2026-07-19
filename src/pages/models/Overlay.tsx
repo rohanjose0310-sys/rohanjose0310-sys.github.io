@@ -1,6 +1,7 @@
 import { Children, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { BrandMark } from '../../components/ui/Logo'
 import { useStore, store } from './store'
 import { MODELS } from './modelData'
 
@@ -37,10 +38,24 @@ export function Overlay() {
   return (
     <>
       <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
-        <Link to="/" style={{ position: 'absolute', bottom: 40, left: 40, fontSize: '13px' }}>
-          ROHAN JOSE
-          <br />
-          ← BACK HOME
+        <Link
+          to="/"
+          style={{
+            position: 'absolute',
+            bottom: 40,
+            left: 40,
+            fontSize: '13px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+          }}
+        >
+          <BrandMark height={19.5} />
+          <span>
+            ROHAN JOSE
+            <br />
+            ← BACK HOME
+          </span>
         </Link>
         <div style={{ position: 'absolute', bottom: 40, right: 40, fontSize: '13px' }}>
           CAD — FUSION 360 / RHINO

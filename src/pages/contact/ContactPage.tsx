@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { BrandMark } from '../../components/ui/Logo'
 import { ShaderPanel } from './ShaderPanel'
 import './contact.css'
 
@@ -59,7 +60,10 @@ export function ContactPage() {
 
   return (
     <main className="contact-page">
-      <span className="corner left">Rohan Jose</span>
+      <span className="corner left">
+        <BrandMark height={19.5} />
+        Rohan Jose
+      </span>
       <Link to="/" className="back-link">
         ← back
       </Link>

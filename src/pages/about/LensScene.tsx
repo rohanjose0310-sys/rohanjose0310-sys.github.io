@@ -121,18 +121,18 @@ export function Lens({
       // the whole scroll. Ramp 0→1 across the final stretch of the scroll.
       const shown = Math.max(0, Math.min(1, (scroll.offset - 0.85) / 0.1))
       document.documentElement.style.setProperty('--about-footer-shown', shown.toFixed(3))
+    }
 
-      // Auto-contrast the back link against the scene buffer behind it (the
-      // footer is white over the dark group photo, so it needs no readback).
-      // One throttled GPU→CPU sample per tick keeps stalls rare.
-      inkClock.current += delta
-      if (inkClock.current > 0.12) {
-        inkClock.current = 0
-        document.documentElement.style.setProperty(
-          '--about-back-ink',
-          inkFor(bufferLuma(state.gl, buffer, 0.12, 0.93))
-        )
-      }
+    // Auto-contrast the back link + logo mark against the scene buffer behind
+    // them (the footer is white over the dark group photo, so it needs no
+    // readback). Runs on both touch and desktop; one throttled GPU→CPU sample
+    // per tick keeps stalls rare.
+    inkClock.current += delta
+    if (inkClock.current > 0.12) {
+      inkClock.current = 0
+      const luma = bufferLuma(state.gl, buffer, 0.12, 0.93)
+      document.documentElement.style.setProperty('--about-back-ink', inkFor(luma))
+      document.documentElement.style.setProperty('--about-logo-ink', luma < 140 ? '1' : '0')
     }
   })
   return (
