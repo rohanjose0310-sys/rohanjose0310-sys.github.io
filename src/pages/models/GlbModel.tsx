@@ -39,8 +39,22 @@ function upgradeMaterial(material: Material): Material {
     return new MeshStandardMaterial({ name, color: '#e8e8e8', metalness: 1, roughness: 0.08 })
   }
   if (/titanium|steel|alumin/i.test(name)) {
-    // The satin-gray parts — deliberately not glossy.
+    // The satin-gray parts — deliberately not glossy. Reads as satin titanium
+    // (the radial engine's crankcase + cylinders, the helmet's shell).
     return new MeshStandardMaterial({ name, color: '#d8d5cd', metalness: 1, roughness: 0.35 })
+  }
+  if (/enamel|paint/i.test(name)) {
+    // Glossy enamel accent hardware — keep the CAD paint colour (Kd baked into
+    // baseColor on conversion) but give it a clearcoated, painted-metal finish.
+    const src = material as MeshStandardMaterial
+    return new MeshPhysicalMaterial({
+      name,
+      color: src.color,
+      roughness: 0.25,
+      metalness: 0,
+      clearcoat: 1,
+      clearcoatRoughness: 0.1,
+    })
   }
   if (/red/i.test(name)) {
     // High-gloss orange shell parts (Fusion Kd #ff4000).

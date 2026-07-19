@@ -35,15 +35,17 @@ export const MODELS: ModelDatum[] = [
     rotation: [-Math.PI / 2 + 0.04, 0, 0.35],
   },
   {
-    id: 'torus-knot',
-    name: 'Torus Knot',
+    id: 'radial-engine',
+    name: 'Radial Engine',
     numeral: '02',
-    titleLines: ['TORUS', '“KNOT”', 'STUDY'],
-    subtitle: 'Parametric surface study',
+    titleLines: ['RADIAL', '“ENGINE”', 'ASSEMBLY'],
+    subtitle: 'Multi-cylinder engine study',
     tag: 'Fusion 360',
     description:
-      'A closed-loop surface exercise exploring continuous curvature and self-intersection clearance. Placeholder copy — swapped for the real writeup when the CAD export lands.',
-    kind: 'placeholder',
+      'A radial aircraft-engine assembly — satin-titanium crankcase and cylinders with glossy enamel accent hardware, modeled as a mechanical study and exported straight from the CAD assembly.',
+    kind: 'glb',
+    url: '/models/radial-engine.glb',
+    rotation: [0.1, 0, 0],
   },
   {
     id: 'gear',

@@ -1,15 +1,14 @@
 import { useRef, type ReactNode } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useGLTF, MeshTransmissionMaterial, ContactShadows, Environment } from '@react-three/drei'
+import { MeshTransmissionMaterial, ContactShadows, Environment } from '@react-three/drei'
 import { easing } from 'maath'
-import type { Group, Mesh, MeshStandardMaterial, BufferGeometry } from 'three'
+import type { Mesh, MeshStandardMaterial } from 'three'
 import { GlbModel } from './GlbModel'
 import { store, useStore } from './store'
 import { MODELS } from './modelData'
 
 // Port of pmndrs/examples demos/frosted-glass (MIT). A frosted transmission
 // lens follows the pointer and snaps open over the model.
-const SHOE_URL = '/models/nike_air_zoom_pegasus_36-transformed.glb'
 
 export function FrostedScene() {
   return (
@@ -38,10 +37,13 @@ export function FrostedScene() {
 function SelectedModel() {
   const state = useStore()
   const model = MODELS.find((m) => m.id === state.selectedId) ?? MODELS[0]
+  // Only the real CAD exports render geometry; placeholder entries keep their
+  // menu/copy but show just the frosted lens over the empty studio (the
+  // stand-in shoe has been removed).
   if (model.kind === 'glb' && model.url) {
     return <GlbModel key={model.id} url={model.url} rotation={model.rotation} />
   }
-  return <Shoe rotation={[0.3, Math.PI / 1.6, 0]} />
+  return null
 }
 
 function Selector({ children }: { children: ReactNode }) {
@@ -69,27 +71,3 @@ function Selector({ children }: { children: ReactNode }) {
   )
 }
 
-/*
-Stand-in model until real Fusion 360 / Rhino exports land.
-Author: quaz30 (https://sketchfab.com/quaz30) — License: CC-BY-4.0
-Source: https://sketchfab.com/3d-models/nike-air-zoom-pegasus-36-00fd99e778c244c3bd3b65f99dad7cb2
-*/
-function Shoe(props: { rotation?: [number, number, number] }) {
-  const ref = useRef<Group>(null!)
-  const { nodes, materials } = useGLTF(SHOE_URL) as unknown as {
-    nodes: { defaultMaterial: { geometry: BufferGeometry } }
-    materials: { NikeShoe: MeshStandardMaterial }
-  }
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime()
-    ref.current.rotation.set(Math.cos(t / 4) / 8, Math.sin(t / 3) / 4, 0.15 + Math.sin(t / 2) / 8)
-    ref.current.position.y = (0.5 + Math.cos(t / 2)) / 7
-  })
-  return (
-    <group ref={ref}>
-      <mesh receiveShadow castShadow geometry={nodes.defaultMaterial.geometry} material={materials.NikeShoe} {...props} />
-    </group>
-  )
-}
-
-useGLTF.preload(SHOE_URL)
