@@ -56,7 +56,9 @@ html.touch .frosted .model-menu {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 400px;
+  /* Wide enough for the longest title line ("HOUSING"/"CAPSULE" quoted,
+     "ASSEMBLY") at the h3 font size below without clipping. */
+  width: 500px;
   transform: translate3d(-50%, -50%, 0);
   border-left: 1px solid black;
   padding-left: 40px;
