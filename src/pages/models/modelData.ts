@@ -11,13 +11,19 @@ export interface ModelDatum {
   tag: string
   description: string
   /**
-   * 'placeholder' renders the demo shoe as stand-in geometry.
+   * 'placeholder' renders no geometry (just the frosted lens over the studio).
    * 'glb' loads `url` — a real CAD export converted via obj2gltf + draco.
    */
   kind: 'placeholder' | 'glb'
   url?: string
   /** Extra base rotation applied under the idle float, per model. */
   rotation?: [number, number, number]
+  /**
+   * Uniform material override for single-material CAD parts (see GlbModel).
+   * 'chrome' = mirror silver, 'steel' = polished machined steel. Omit to keep
+   * the name-based material upgrade (helmet, radial engine).
+   */
+  finish?: 'chrome' | 'steel'
 }
 
 export const MODELS: ModelDatum[] = [
@@ -50,36 +56,61 @@ export const MODELS: ModelDatum[] = [
     rotation: [-Math.PI / 2, 0, 0],
   },
   {
-    id: 'gear',
-    name: 'Gear',
+    id: 'wheel-rim',
+    name: 'Wheel Rim',
     numeral: '03',
-    titleLines: ['SPUR', '“GEAR”', 'TRAIN'],
-    subtitle: 'Motion transmission part',
+    titleLines: ['ALLOY', '“WHEEL”', 'RIM'],
+    subtitle: 'Performance alloy wheel',
     tag: 'Fusion 360',
     description:
-      'Involute tooth profile cut from a parametric sketch, sized for a 3D-printed gear train. Placeholder copy — swapped for the real writeup when the CAD export lands.',
-    kind: 'placeholder',
+      'A multi-spoke performance wheel rim turned in chrome silver — a polished automotive study modeled in Fusion 360 and exported straight from the CAD assembly.',
+    kind: 'glb',
+    url: '/models/wheel-rim.glb',
+    finish: 'chrome',
+    // Wheel face lies in the X–Z plane (axle along Y); tilt ~90° about X so the
+    // spokes face the camera, with a small skew for a three-quarter view.
+    rotation: [-Math.PI / 2, 0, 0.2],
   },
   {
-    id: 'capsule',
-    name: 'Capsule',
+    id: 'bevel-gear',
+    name: 'Bevel Gear',
     numeral: '04',
-    titleLines: ['SEALED', '“CAPSULE”', 'SHELL'],
-    subtitle: 'Enclosure concept',
-    tag: 'Rhino',
+    titleLines: ['HELICAL', '“BEVEL”', 'GEAR'],
+    subtitle: 'Right-angle drive gear',
+    tag: 'Fusion 360',
     description:
-      'A two-part pressure-fit shell blended from lofted sections. Placeholder copy — swapped for the real writeup when the CAD export lands.',
-    kind: 'placeholder',
+      'A helical bevel gear machined in satin steel, its curved teeth meshing at a right angle for smooth, quiet power transmission — exported straight from the CAD assembly.',
+    kind: 'glb',
+    url: '/models/bevel-gear.glb',
+    finish: 'steel',
+    rotation: [0, 0, 0],
   },
   {
-    id: 'housing',
-    name: 'Housing',
+    id: 'gear-slider',
+    name: 'Gear Slider',
     numeral: '05',
-    titleLines: ['MOTOR', '“HOUSING”', 'MK.I'],
-    subtitle: 'Functional prototype',
-    tag: 'Rhino',
+    titleLines: ['GEAR', '“SLIDER”', 'ASSEMBLY'],
+    subtitle: 'Linear motion mechanism',
+    tag: 'Fusion 360',
     description:
-      'Ribbed housing with boss mounts and cable strain relief, modeled for FDM printing. Placeholder copy — swapped for the real writeup when the CAD export lands.',
-    kind: 'placeholder',
+      'A gear-driven slider that converts rotation into linear travel, machined in satin steel as a mechanism study and exported straight from the CAD assembly.',
+    kind: 'glb',
+    url: '/models/gear-slider.glb',
+    finish: 'steel',
+    rotation: [0, 0, 0],
+  },
+  {
+    id: 'gravity-hook',
+    name: 'Gravity Hook',
+    numeral: '06',
+    titleLines: ['GRAVITY', '“HOOK”', 'CATCH'],
+    subtitle: 'Self-locking catch',
+    tag: 'Fusion 360',
+    description:
+      'A gravity-actuated locking hook in satin steel — a compact hardware study modeled in Fusion 360 and exported straight from the CAD assembly.',
+    kind: 'glb',
+    url: '/models/gravity-hook.glb',
+    finish: 'steel',
+    rotation: [-Math.PI / 2, 0, 0],
   },
 ]

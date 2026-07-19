@@ -21,6 +21,22 @@ const TARGET_SIZE = 1.55
 // materials every time.
 const upgradedScenes = new WeakSet<object>()
 
+// Single-material CAD parts get a uniform finish override (see modelData
+// `finish`) rather than the name-based upgrade below: 'chrome' is a mirror
+// silver, 'steel' a polished machined steel. The scene's city Environment
+// supplies the reflections that sell both.
+function finishMaterial(finish: 'chrome' | 'steel', name: string): Material {
+  if (finish === 'chrome') {
+    return new MeshStandardMaterial({ name, color: '#e6e7ea', metalness: 1, roughness: 0.05, envMapIntensity: 1.4 })
+  }
+  // Satin machined steel. Roughness is kept up near the helmet's titanium
+  // (0.35) on purpose: the city Environment is fairly dark, and a sharper
+  // (lower-roughness) metal would mirror those dark tones and read near-black.
+  // At this roughness it leans on the brighter blurred irradiance and reads as
+  // a light, cool steel with a soft sheen. Cooler tint than the titanium.
+  return new MeshStandardMaterial({ name, color: '#d4d6da', metalness: 1, roughness: 0.34, envMapIntensity: 1.15 })
+}
+
 function upgradeMaterial(material: Material, engineMetals = false): Material {
   const name = material.name
   // Engine-only re-skin: turn the CAD accent paints into machined engine
@@ -90,11 +106,14 @@ export function GlbModel({
   url,
   rotation = [0, 0, 0],
   engineMetals = false,
+  finish,
 }: {
   url: string
   rotation?: [number, number, number]
   /** Re-skin CAD accent paints as engine metals (radial engine only). */
   engineMetals?: boolean
+  /** Uniform metal override for single-material parts (see modelData). */
+  finish?: 'chrome' | 'steel'
 }) {
   const ref = useRef<Group>(null!)
   const { scene } = useGLTF(url)
@@ -104,7 +123,9 @@ export function GlbModel({
       scene.traverse((child) => {
         if (child instanceof Mesh) {
           child.castShadow = child.receiveShadow = true
-          child.material = upgradeMaterial(child.material as Material, engineMetals)
+          child.material = finish
+            ? finishMaterial(finish, (child.material as Material).name)
+            : upgradeMaterial(child.material as Material, engineMetals)
         }
       })
       upgradedScenes.add(scene)
@@ -117,7 +138,7 @@ export function GlbModel({
     const center = box.getCenter(new Vector3())
     const s = TARGET_SIZE / Math.max(size.x, size.y, size.z)
     return { offset: center.multiplyScalar(-s).toArray(), scale: s }
-  }, [scene, engineMetals])
+  }, [scene, engineMetals, finish])
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime()

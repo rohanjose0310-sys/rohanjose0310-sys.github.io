@@ -47,6 +47,7 @@ function SelectedModel() {
         url={model.url}
         rotation={model.rotation}
         engineMetals={model.id === 'radial-engine'}
+        finish={model.finish}
       />
     )
   }
