@@ -45,7 +45,9 @@ export const MODELS: ModelDatum[] = [
       'A radial aircraft-engine assembly — satin-titanium crankcase and cylinders with glossy enamel accent hardware, modeled as a mechanical study and exported straight from the CAD assembly.',
     kind: 'glb',
     url: '/models/radial-engine.glb',
-    rotation: [0.1, 0, 0],
+    // Star face lies in the model's X–Z plane; tilt ~90° about X so the
+    // cylinders radiate toward the camera instead of being seen edge-on.
+    rotation: [-Math.PI / 2, 0, 0],
   },
   {
     id: 'gear',

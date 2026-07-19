@@ -41,7 +41,14 @@ function SelectedModel() {
   // menu/copy but show just the frosted lens over the empty studio (the
   // stand-in shoe has been removed).
   if (model.kind === 'glb' && model.url) {
-    return <GlbModel key={model.id} url={model.url} rotation={model.rotation} />
+    return (
+      <GlbModel
+        key={model.id}
+        url={model.url}
+        rotation={model.rotation}
+        engineMetals={model.id === 'radial-engine'}
+      />
+    )
   }
   return null
 }

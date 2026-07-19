@@ -21,8 +21,22 @@ const TARGET_SIZE = 1.55
 // materials every time.
 const upgradedScenes = new WeakSet<object>()
 
-function upgradeMaterial(material: Material): Material {
+function upgradeMaterial(material: Material, engineMetals = false): Material {
   const name = material.name
+  // Engine-only re-skin: turn the CAD accent paints into machined engine
+  // metals so the radial engine reads as one satin-metal object rather than
+  // primary-coloured CAD. Scoped by the engineMetals flag so the helmet's
+  // materials keep their exact original treatment below.
+  if (engineMetals && /enamel|paint/i.test(name)) {
+    const metal = (color: string, roughness: number) =>
+      new MeshStandardMaterial({ name, color, metalness: 1, roughness })
+    if (/green/i.test(name)) return metal('#565a5e', 0.42) // cylinder barrels — gunmetal
+    if (/blue/i.test(name)) return metal('#3c4046', 0.42) // anthracite
+    if (/red/i.test(name)) return metal('#c6c6ca', 0.16) // polished steel internals
+    if (/yellow/i.test(name)) return metal('#b3894c', 0.3) // brass accent
+    if (/grey|gray/i.test(name)) return metal('#2a2c2f', 0.38) // near-black satin
+    return metal('#9a9ca0', 0.4)
+  }
   if (/glass/i.test(name)) {
     const bronze = /bronze/i.test(name)
     return new MeshPhysicalMaterial({
@@ -42,19 +56,6 @@ function upgradeMaterial(material: Material): Material {
     // The satin-gray parts — deliberately not glossy. Reads as satin titanium
     // (the radial engine's crankcase + cylinders, the helmet's shell).
     return new MeshStandardMaterial({ name, color: '#d8d5cd', metalness: 1, roughness: 0.35 })
-  }
-  if (/enamel|paint/i.test(name)) {
-    // Glossy enamel accent hardware — keep the CAD paint colour (Kd baked into
-    // baseColor on conversion) but give it a clearcoated, painted-metal finish.
-    const src = material as MeshStandardMaterial
-    return new MeshPhysicalMaterial({
-      name,
-      color: src.color,
-      roughness: 0.25,
-      metalness: 0,
-      clearcoat: 1,
-      clearcoatRoughness: 0.1,
-    })
   }
   if (/red/i.test(name)) {
     // High-gloss orange shell parts (Fusion Kd #ff4000).
@@ -85,7 +86,16 @@ function upgradeMaterial(material: Material): Material {
   return material
 }
 
-export function GlbModel({ url, rotation = [0, 0, 0] }: { url: string; rotation?: [number, number, number] }) {
+export function GlbModel({
+  url,
+  rotation = [0, 0, 0],
+  engineMetals = false,
+}: {
+  url: string
+  rotation?: [number, number, number]
+  /** Re-skin CAD accent paints as engine metals (radial engine only). */
+  engineMetals?: boolean
+}) {
   const ref = useRef<Group>(null!)
   const { scene } = useGLTF(url)
 
@@ -94,7 +104,7 @@ export function GlbModel({ url, rotation = [0, 0, 0] }: { url: string; rotation?
       scene.traverse((child) => {
         if (child instanceof Mesh) {
           child.castShadow = child.receiveShadow = true
-          child.material = upgradeMaterial(child.material as Material)
+          child.material = upgradeMaterial(child.material as Material, engineMetals)
         }
       })
       upgradedScenes.add(scene)
@@ -107,7 +117,7 @@ export function GlbModel({ url, rotation = [0, 0, 0] }: { url: string; rotation?
     const center = box.getCenter(new Vector3())
     const s = TARGET_SIZE / Math.max(size.x, size.y, size.z)
     return { offset: center.multiplyScalar(-s).toArray(), scale: s }
-  }, [scene])
+  }, [scene, engineMetals])
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime()
