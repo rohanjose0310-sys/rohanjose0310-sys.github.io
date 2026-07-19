@@ -11,9 +11,9 @@ const DARK_BACKDROP_ROUTES = ['/projects', '/resume']
 // stays out of the way on those routes.
 const INLINE_MARK_ROUTES = ['/', '/contact', '/models', '/about']
 
-// Aspect ratio of the source PNGs (239x74 / 238x74) — used to size the
+// Aspect ratio of the source PNGs (225x74 / 226x74) — used to size the
 // two-image stack in AdaptiveMark without waiting on image load.
-const LOGO_ASPECT = 239 / 74
+const LOGO_ASPECT = 225.5 / 74
 
 function useLogoSrc() {
   const { pathname } = useLocation()
