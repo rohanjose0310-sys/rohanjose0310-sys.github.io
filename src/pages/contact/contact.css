@@ -1,4 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+/* Newsreader stands in for the reference's FeatureDeck (Ohno Type Co., a
+   commercial licence we don't hold). Same role: a wide, moderate-contrast
+   editorial serif. Swap the family below if Feature Deck is ever licensed. */
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400&display=swap');
 
 /* Contact page: light "white space" front with a centered form column and two
    shader panels bleeding off the edges (bottom-left + right third). */
@@ -6,9 +10,106 @@
   position: relative;
   min-height: 100%;
   overflow: hidden;
-  padding: 7rem 1.5rem 9rem;
-  background: #e9ebed;
+  padding: 5.5rem 1.5rem 3.5rem;
+  background: #0b0b0b;
   color: #111;
+}
+
+/* Layer 0: the black/orange shader, pinned to the viewport. */
+.contact-shader {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.contact-shader canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Layer 1: the light form surface, built from three tiles that slide up from
+   below the fold. --bg-position drives the outer pair, --bg-center-position the
+   middle one, so the centre can trail the sides. */
+.contact-bg {
+  --bg-position: 0%;
+  --bg-center-position: 0%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  z-index: 1;
+  /* The wrapper itself is transparent below the (short) side tiles — only its
+     painted children should catch the pointer, so the shader stays clickable
+     through the wrapper's empty space instead of being blocked box-wide. */
+  pointer-events: none;
+}
+
+.contact-bg::before,
+.contact-bg::after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: var(--bg-position);
+  width: calc((53.75vw + 1px) / 2);
+  background: #e9ebed;
+  pointer-events: auto;
+}
+
+.contact-bg::before {
+  left: 0;
+  height: 80vh;
+}
+
+/* Ends level with the first input's rule (~30vh), so the shader runs from
+   there to the bottom of the page. */
+.contact-bg::after {
+  right: 0;
+  height: 30vh;
+}
+
+.contact-bg__inner {
+  position: absolute;
+  top: var(--bg-center-position);
+  left: 26.875vw;
+  width: 46.25vw;
+  height: 100%;
+  background: #e9ebed;
+  pointer-events: auto;
+}
+
+/* The opening title: two masked rows that reveal, then split and scale past. */
+.contact-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 10rem 1.875rem 6.875rem;
+  pointer-events: none;
+}
+
+.contact-intro h1 {
+  margin: 0;
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400;
+  font-size: max(3rem, 8.75vw);
+  color: #fff;
+}
+
+.contact-intro__line {
+  overflow: hidden;
+  line-height: 1.2;
+}
+
+.contact-intro__line span {
+  display: block;
 }
 
 .contact-page .corner {
@@ -19,7 +120,7 @@
   text-transform: uppercase;
   color: #111;
   text-decoration: none;
-  z-index: 2;
+  z-index: 3;
 }
 
 .contact-page .corner.left {
@@ -38,7 +139,7 @@
   color: #111;
   text-decoration: none;
   text-transform: none;
-  z-index: 2;
+  z-index: 3;
 }
 
 .contact-page .corner.right {
@@ -46,36 +147,43 @@
   opacity: 0.6;
 }
 
+/* Sized to the reference's proportions: the form is ~66% of the 46.25vw centre
+   column, so there is real whitespace before the shader on either side. */
 .contact-form {
   position: relative;
-  z-index: 1;
-  width: min(620px, 100%);
+  z-index: 2;
+  width: min(560px, 30.5vw);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
 }
 
+/* Metrics copied from the reference's #contact-content .fui-heading:
+   font-size max(1.6rem, 3400vw / 1440), line-height 1.2, weight 400,
+   margin-bottom .65em. Their 1440 design width reduces to 2.361vw. */
 .contact-form h1 {
-  font-family: 'Instrument Serif', serif;
+  font-family: 'Newsreader', serif;
   font-weight: 400;
-  font-size: clamp(2rem, 3.2vw, 2.75rem);
-  line-height: 1.15;
+  font-size: max(1.55rem, 2.7vw);
+  line-height: 1.2;
+  letter-spacing: normal;
   text-align: center;
   color: #111;
-  margin: 0 0 4rem;
+  margin: 0 0 1.7em;
 }
 
 .contact-form h1.second {
-  margin: 4.5rem 0 3rem;
+  margin: 2.2rem 0 1.4em;
 }
 
 .contact-form label {
   display: block;
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 1;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   color: #333;
-  margin-bottom: 0;
+  margin-bottom: 2px;
 }
 
 .contact-form label .req {
@@ -91,8 +199,11 @@
   border-bottom: 1px solid #111;
   color: #111;
   font: inherit;
-  padding: 0.2rem 0 0.6rem;
-  margin-bottom: 3.2rem;
+  font-size: 15px;
+  /* Tight padding-bottom so the typed text hovers just above the rule. */
+  line-height: 1.15;
+  padding: 0 0 4px;
+  margin-bottom: 2.1rem;
   border-radius: 0;
   caret-color: var(--accent);
   resize: vertical;
@@ -100,7 +211,7 @@
 }
 
 .contact-form textarea {
-  min-height: 2.6rem;
+  min-height: 1.35rem;
 }
 
 .contact-form input:focus,
@@ -120,8 +231,8 @@
   text-transform: uppercase;
   background: #111;
   color: #e9ebed;
-  padding: 1.05rem 4.5rem;
-  margin-top: 1rem;
+  padding: 0.85rem 3.5rem;
+  margin-top: 0.5rem;
   box-shadow:
     -14px 12px 0 rgba(17, 17, 17, 0.22),
     14px -12px 0 rgba(17, 17, 17, 0.12);
@@ -135,37 +246,11 @@
     18px -15px 0 rgba(17, 17, 17, 0.14);
 }
 
-/* Shader panels bleed off the viewport like the reference layout. */
-.shader-panel {
-  position: absolute;
-  z-index: 0;
-}
-
-.shader-panel canvas {
-  display: block;
-}
-
-.shader-panel.left {
-  left: 0;
-  top: 76vh; /* lower-left of the first viewport, like the reference */
-  width: 24vw;
-  height: 42vh;
-  min-width: 240px;
-}
-
-.shader-panel.right {
-  right: -9vw;
-  top: 40vh; /* anchored to the first viewport, like the reference */
-  width: 33vw;
-  height: 70vh;
-  min-width: 300px;
-}
-
 .panel-links {
   position: absolute;
   right: 4vw;
   top: 62vh;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -183,26 +268,33 @@
 }
 
 @media (max-width: 900px) {
-  .shader-panel.left {
+  /* One full-width tile, stopping short of the page bottom so the shader still
+     shows as a band behind the contact links. */
+  .contact-page {
+    padding-bottom: 4rem;
+  }
+  .contact-form {
+    width: min(560px, 100%);
+  }
+  .contact-bg::before,
+  .contact-bg::after {
     display: none;
   }
-  .shader-panel.right {
-    top: auto;
-    bottom: -8rem;
-    right: -12vw;
-    width: 70vw;
-    height: 40vh;
+  .contact-bg__inner {
+    left: 0;
+    width: 100%;
+    height: calc(100% - 16rem);
+    top: var(--bg-position);
   }
   .panel-links {
     position: relative;
-    z-index: 1;
     top: auto;
     right: auto;
-    margin-top: 5rem;
+    margin-top: 7rem;
     align-items: center;
   }
-  .panel-links a {
-    color: #111;
+  .contact-intro h1 {
+    font-size: max(2.25rem, 12vw);
   }
 }
 

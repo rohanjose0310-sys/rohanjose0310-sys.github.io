@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { BrandMark } from '../../components/ui/Logo'
+import { ContactIntro } from './ContactIntro'
 import { ShaderPanel } from './ShaderPanel'
 import './contact.css'
 
@@ -60,6 +61,15 @@ export function ContactPage() {
 
   return (
     <main className="contact-page">
+      {/* Black/orange shader fills the viewport; the light tiles below slide up
+          over it, leaving it exposed at the lower left and along the right. */}
+      <ShaderPanel className="contact-shader" />
+      <div className="contact-bg">
+        <span className="contact-bg__inner" />
+      </div>
+
+      <ContactIntro />
+
       <span className="corner left">
         <BrandMark height={19.5} />
         Rohan Jose
@@ -68,9 +78,6 @@ export function ContactPage() {
         ← back
       </Link>
       <span className="corner right">Contact</span>
-
-      <ShaderPanel className="shader-panel left" />
-      <ShaderPanel className="shader-panel right" />
 
       <form className="contact-form" onSubmit={onSubmit}>
         <h1>Hello, nice to meet you!</h1>
