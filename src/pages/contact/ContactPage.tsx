@@ -68,6 +68,11 @@ export function ContactPage() {
         <span className="contact-bg__inner" />
       </div>
 
+      {/* Feeds iOS Safari the tint for its status bar and toolbar — invisible,
+          touch only. See .contact-tint in contact.css for why this is needed. */}
+      <span className="contact-tint top" aria-hidden="true" />
+      <span className="contact-tint bottom" aria-hidden="true" />
+
       <ContactIntro />
 
       <span className="corner left">

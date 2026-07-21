@@ -15,11 +15,15 @@
   color: #111;
 }
 
-/* Layer 0: the black/orange shader, pinned to the viewport. */
+/* Layer 0: the black/orange shader, pinned to the viewport. The explicit
+   background is not cosmetic (the canvas paints over it): a fixed element with
+   a *transparent* background is what makes iOS 26 Safari guess at its bar tint
+   — see .contact-tint below. It also backs the canvas's 5s fade-in. */
 .contact-shader {
   position: fixed;
   inset: 0;
   z-index: 0;
+  background: #0b0b0b;
 }
 
 .contact-shader canvas {
@@ -79,6 +83,23 @@
   height: 100%;
   background: #e9ebed;
   pointer-events: auto;
+}
+
+/* iOS 26 Safari ignores <meta name="theme-color">. It tints its status bar
+   ("forehead") and toolbar ("chin") from the nearest position:fixed element
+   that has a background-color — top edge feeds the status bar, bottom edge
+   feeds the toolbar — falling back to body. A fixed element with a
+   *transparent* background makes it guess from whatever shows through, which
+   is why this page (whose only fixed layers were the shader and the intro,
+   both inset:0 and transparent) got flat light blocks at both ends.
+   These two strips hand it the answer: the light form surface at the top, the
+   shader band at the bottom, so each bar matches the content it sits over and
+   the page reads as running under Safari's UI. They are 8px (Safari needs a
+   full-width fixed element of at least 6px) and sit inside the status bar /
+   home indicator areas, so they are never visible. Touch only — desktop
+   Safari has no such bars. */
+.contact-tint {
+  display: none;
 }
 
 /* The opening title: two masked rows that reveal, then split and scale past. */
@@ -268,10 +289,43 @@
 }
 
 @media (max-width: 900px) {
+  /* Above the intro (z-index 5) so they are the topmost fixed layers at both
+     edges and Safari has no other candidate to sample. */
+  .contact-tint {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    height: 8px;
+    z-index: 6;
+    pointer-events: none;
+  }
+  .contact-tint.top {
+    top: 0;
+    background: #e9ebed;
+  }
+  .contact-tint.bottom {
+    bottom: 0;
+    background: #0b0b0b;
+  }
+
   /* One full-width tile, stopping short of the page bottom so the shader still
-     shows as a band behind the contact links. */
+     shows as a band behind the contact links. The safe-area insets keep the
+     corner chrome out from under the status bar and the contact links out from
+     under the collapsed toolbar — Safari's bars overlay the page, so anything
+     inside them is unreadable rather than merely tinted. */
   .contact-page {
-    padding-bottom: 4rem;
+    padding-top: calc(5.5rem + env(safe-area-inset-top, 0px));
+    /* env() only reports the home indicator, not Safari's collapsed toolbar on
+       top of it — the extra 1.5rem is what keeps the phone number clear of it
+       (it was being cut in half). */
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  }
+  .contact-page .corner {
+    top: calc(2rem + env(safe-area-inset-top, 0px));
+  }
+  .contact-page .back-link {
+    top: calc(2rem + 1.6rem + env(safe-area-inset-top, 0px));
   }
   .contact-form {
     width: min(560px, 100%);
