@@ -1,7 +1,6 @@
 :root {
   --text: #9ca3af;
   --text-h: #f3f4f6;
-  --bg: #0b0b0f;
   --border: #2e303a;
   --accent: #ff6a00;
 
@@ -11,9 +10,12 @@
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
-  color-scheme: dark;
+  /* --page-bg and color-scheme are both set per route by the inline script in
+     index.html (it has to run before first paint — see the comment there). The
+     values here are only the no-JS fallback. */
+  color-scheme: light;
   color: var(--text);
-  background: var(--bg);
+  background: var(--page-bg, #eef0f2);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -31,8 +33,11 @@ body,
 }
 
 /* Space-tech orange dot cursor across the site. The frosted-glass models page
-   opts back out to the default cursor (see models.css). */
+   opts back out to the default cursor (see models.css). The background is not
+   cosmetic: body's background-color is the fallback iOS 26 Safari samples for
+   its bar tint, and it was transparent, which resolved to the dark canvas. */
 body {
+  background: var(--page-bg, #eef0f2);
   cursor:
     url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxMCIgZmlsbD0iI0ZGNkEwMCIvPjwvc3ZnPg=='),
     auto;
