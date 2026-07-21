@@ -27,18 +27,31 @@ html.touch .frosted .model-menu {
   top: calc(24px + env(safe-area-inset-top));
 }
 
-/* iOS 26 Safari only composites the real page pixels behind its status bar and
-   toolbar when the document has a non-zero scroll offset; at scrollY 0 it
-   paints a flat sampled colour instead, which can never match this page's
-   moving frost and shadows. .frosted is fixed and takes touch-action, so this
-   runway is never scrollable by hand — it exists purely to hand Safari the
-   non-zero scroll state (see ModelsPage, which scrolls into it once). */
-html.touch .frosted {
-  touch-action: none;
-}
-html.touch .scroll-runway {
-  height: calc(100lvh + 120px);
+/* Safari paints its own opaque bar behind the status bar and toolbar rather
+   than compositing this page's pixels (it only does the latter with a non-zero
+   document scroll, which a fixed viewport-height page can never have — a scroll
+   runway was tried and did nothing). So instead of fighting for real pixels,
+   dissolve the seam: fade the scene into exactly the colour Safari tints with,
+   top and bottom, so there is no edge left to notice. A pseudo-element is
+   deliberate — Safari's tint sampler ignores pseudo-elements, so this cannot
+   perturb the colour it derives. */
+html.touch .frosted::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   pointer-events: none;
+  background:
+    linear-gradient(to bottom, #d0d0d0 0, rgba(208, 208, 208, 0) 96px),
+    linear-gradient(to top, #d0d0d0 0, rgba(208, 208, 208, 0) 190px);
+}
+
+/* The overlay has to clear the pseudo-element above it. */
+html.touch .frosted .model-menu,
+html.touch .frosted .info,
+html.touch .frosted .corner-home,
+html.touch .frosted .corner-cad {
+  z-index: 2;
 }
 
 .frosted a {
@@ -204,33 +217,47 @@ html.touch .frosted .info {
   left: 24px;
   right: 24px;
   width: auto;
-  transform: translateY(-50%);
+  /* Anchored under the model menu rather than centred on the viewport: the
+     open block is tall enough that centring drove the numeral and first title
+     line up behind the last menu items. Top-anchored also keeps the reveal
+     growing downwards, the way it reads on desktop. */
+  top: calc(env(safe-area-inset-top) + 272px);
+  transform: none;
   padding-left: 18px;
 }
 
+/* Capped against vh as well as vw: the menu, the open block and the corner
+   labels together only just fit a tall phone, so on a shorter one the whole
+   block has to come down with the viewport rather than run into them. */
 html.touch .frosted .info h1 {
-  font-size: 1.4em;
+  font-size: min(1.4em, 3.4vh);
   margin-bottom: 0.4em;
 }
 
 html.touch .frosted .info h3 {
-  font-size: min(2.3em, 11vw);
+  font-size: min(2.3em, 11vw, 5.2vh);
   letter-spacing: -1.5px;
 }
 
 html.touch .frosted .info h4 {
-  font-size: 0.95em;
+  font-size: min(0.95em, 2.2vh);
   letter-spacing: -0.5px;
   margin: 8px 0;
 }
 
 html.touch .frosted .info p {
-  font-size: 13px;
+  font-size: min(13px, 1.75vh);
 }
 
+/* .frosted spans 100lvh, so its bottom edge is the physical screen bottom —
+   underneath Safari's floating toolbar, which is where these labels were
+   disappearing to (and the page can't scroll to reach them). env() only
+   accounts for the home indicator, not the toolbar, so clear the larger of a
+   flat 112px and the actual chrome height (100lvh - 100svh), whichever the
+   device reports. */
 html.touch .frosted .corner-home,
 html.touch .frosted .corner-cad {
-  bottom: calc(18px + env(safe-area-inset-bottom));
+  bottom: max(112px, calc(100lvh - 100svh + 16px));
   font-size: 11px;
 }
 
@@ -240,4 +267,29 @@ html.touch .frosted .corner-home {
 
 html.touch .frosted .corner-cad {
   right: 20px;
+}
+
+/* Small phones. The menu is fixed-size type, so unlike .info it doesn't shrink
+   with the viewport on its own — on a short screen it has to give ground too,
+   or the open block still runs into the corner labels below it. */
+@media (max-height: 740px) {
+  html.touch .frosted .model-menu h2 {
+    margin-bottom: 10px;
+  }
+
+  html.touch .frosted .model-menu ul {
+    gap: 3px;
+  }
+
+  html.touch .frosted .model-menu button {
+    font-size: 12px;
+  }
+
+  html.touch .frosted .info {
+    top: calc(env(safe-area-inset-top) + 244px);
+  }
+
+  html.touch .frosted .info h3 {
+    font-size: min(2.3em, 11vw, 4.6vh);
+  }
 }
