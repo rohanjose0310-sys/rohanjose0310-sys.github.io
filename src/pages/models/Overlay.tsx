@@ -38,28 +38,11 @@ export function Overlay() {
   return (
     <>
       <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
-        <Link
-          to="/"
-          style={{
-            position: 'absolute',
-            bottom: 40,
-            left: 40,
-            fontSize: '13px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-          }}
-        >
+        <Link to="/" className="corner-home">
           <BrandMark height={19.5} />
-          <span>
-            ROHAN JOSE
-            <br />
-            ← BACK HOME
-          </span>
+          <span>ROHAN JOSE</span>
         </Link>
-        <div style={{ position: 'absolute', bottom: 40, right: 40, fontSize: '13px' }}>
-          CAD — FUSION 360 / RHINO
-        </div>
+        <div className="corner-cad">CAD — FUSION 360 / RHINO</div>
       </div>
 
       <nav className="model-menu">
