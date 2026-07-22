@@ -11,6 +11,7 @@ import type { RayEvent, ReflectApi } from './prism/Reflect'
 import { calculateRefractionAngle, lerp, lerpV3 } from './prism/util'
 import { BackArrow } from './BackArrow'
 import { PROJECTS } from './projectData'
+import { IS_TOUCH } from '../../lib/touch'
 
 import interFont from './assets/Inter_Bold.json?url'
 
@@ -110,8 +111,9 @@ export function PrismScene() {
       {/* Rainbow and flares */}
       <Rainbow ref={rainbow} startRadius={0} endRadius={0.5} fade={0} />
       <Flare ref={flare} visible={isPrismHit} renderOrder={10} scale={1.25} streak={[12.5, 20, 1]} />
-      {/* Back-home arrow, revealed by light just like the caption */}
-      <BackArrow rainbow={rainbow} />
+      {/* Back-home arrow, revealed by light just like the caption. Desktop
+          only — phones use the browser's own back gesture. */}
+      {!IS_TOUCH && <BackArrow rainbow={rainbow} />}
     </>
   )
 }

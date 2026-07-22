@@ -82,9 +82,13 @@ function AboutOverlay() {
   useVisualViewportInset()
   return (
     <div className="about-overlay">
-      <Link to="/" className="about-back">
-        ← back
-      </Link>
+      {/* Desktop only — on phones the browser's own back gesture covers this,
+          and the corner is needed for the mark. */}
+      {!IS_TOUCH && (
+        <Link to="/" className="about-back">
+          ← back
+        </Link>
+      )}
       <div className="about-logo">
         <AdaptiveMark height={19.5} />
       </div>

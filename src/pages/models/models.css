@@ -46,6 +46,15 @@ html.touch .frosted::after {
     linear-gradient(to top, #d0d0d0 0, rgba(208, 208, 208, 0) 190px);
 }
 
+/* A press that lands on the model is a scene gesture, never a text gesture —
+   without this, holding it also had iOS start selecting the description
+   underneath (and offering the callout menu). */
+html.touch .frosted {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 /* The overlay has to clear the pseudo-element above it. */
 html.touch .frosted .model-menu,
 html.touch .frosted .info,
