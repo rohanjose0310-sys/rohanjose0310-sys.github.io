@@ -157,10 +157,21 @@ export function Lens({
 // drei <Image> meshes expose zoom/grayscale on their shader material.
 type ImageMesh = THREE.Mesh & { material: { zoom: number; grayscale: number } }
 
+// Every X position/width below was tuned for a landscape desktop viewport
+// (~9 world units wide). Portrait phones are much narrower (~2.4 at typical
+// widths), so those literal X values ran the images half off-screen — the
+// grey gaps and cropped edges. Y is untouched: it already comes from the
+// real device `height`, so scroll pacing/timing is unaffected; only the
+// horizontal footprint shrinks to fit. drei's <Image> covers/crops to its
+// plane rather than stretching, so narrowing X just tightens the crop.
+const DESKTOP_DESIGN_WIDTH = 9
+const imgScaleX = (width: number) => (IS_TOUCH ? Math.min(1, width / DESKTOP_DESIGN_WIDTH) : 1)
+
 export function Images() {
   const group = useRef<THREE.Group>(null!)
   const data = useScroll()
   const { width, height } = useThree((state) => state.viewport)
+  const s = imgScaleX(width)
   useFrame(() => {
     const images = group.current.children as ImageMesh[]
     images[0].material.zoom = 1 + data.range(0, 1 / 3) / 3
@@ -173,12 +184,12 @@ export function Images() {
   })
   return (
     <group ref={group}>
-      <Image position={[-2, 0, 0]} scale={[4, height]} url={IMG1} />
-      <Image position={[2, 0, 3]} scale={3} url={IMG6} />
-      <Image position={[-2.05, -height, 6]} scale={[1, 3]} url={TRIP2} />
-      <Image position={[-0.6, -height, 9]} scale={[1, 2]} url={IMG8} />
-      <Image position={[0.75, -height, 10.5]} scale={1.5} url={TRIP4} />
-      <Image position={[0, -height * 1.5, 7.5]} scale={[1.5, 3]} url={IMG3} />
+      <Image position={[-2 * s, 0, 0]} scale={[4 * s, height]} url={IMG1} />
+      <Image position={[2 * s, 0, 3]} scale={[3 * s, 3]} url={IMG6} />
+      <Image position={[-2.05 * s, -height, 6]} scale={[1 * s, 3]} url={TRIP2} />
+      <Image position={[-0.6 * s, -height, 9]} scale={[1 * s, 2]} url={IMG8} />
+      <Image position={[0.75 * s, -height, 10.5]} scale={[1.5 * s, 1.5]} url={TRIP4} />
+      <Image position={[0, -height * 1.5, 7.5]} scale={[1.5 * s, 3]} url={IMG3} />
       <Image position={[0, -height * 2 - height / 4, 0]} scale={[width, height / 1.1]} url={IMG7} />
     </group>
   )
