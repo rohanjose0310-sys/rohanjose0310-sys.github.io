@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { BrandMark } from '../../components/ui/Logo'
 import { ContactIntro } from './ContactIntro'
 import { ShaderPanel } from './ShaderPanel'
+import { IS_TOUCH } from '../../lib/touch'
 import './contact.css'
 
 const EMAIL = 'rohanjose0310@gmail.com'
@@ -68,20 +69,18 @@ export function ContactPage() {
         <span className="contact-bg__inner" />
       </div>
 
-      {/* Feeds iOS Safari the tint for its status bar and toolbar — invisible,
-          touch only. See .contact-tint in contact.css for why this is needed. */}
-      <span className="contact-tint top" aria-hidden="true" />
-      <span className="contact-tint bottom" aria-hidden="true" />
-
       <ContactIntro />
 
       <span className="corner left">
         <BrandMark height={19.5} />
         Rohan Jose
       </span>
-      <Link to="/" className="back-link">
-        ← back
-      </Link>
+      {/* Desktop only — phones use the browser's own back gesture. */}
+      {!IS_TOUCH && (
+        <Link to="/" className="back-link">
+          ← back
+        </Link>
+      )}
       <span className="corner right">Contact</span>
 
       <form className="contact-form" onSubmit={onSubmit}>

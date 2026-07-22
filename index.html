@@ -6,31 +6,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Rohan Jose — Designer</title>
     <script>
-      // iOS 26 Safari ignores <meta name="theme-color"> entirely. It derives the
-      // status-bar ("forehead") and toolbar ("chin") tint by sampling
-      // position:fixed/sticky elements near the viewport edges, falling back to
-      // the html/body background — and it samples at FIRST PAINT, ignoring later
-      // JS colour changes. React hasn't mounted then, so no page backdrop exists
-      // yet and the whole document is whatever the stylesheet says: previously a
-      // dark --bg, which is why every route rendered black bars. Painting content
-      // under the bars (viewport-fit=cover, 100lvh backdrops) can't fix this —
-      // Safari draws its own opaque bar over that content. Setting the route's
-      // real colour here, before <body> exists, is what actually decides them.
-      window.__pageTheme = function (path) {
+      // iOS 26 Safari ignores <meta name="theme-color"> entirely. It tints the
+      // status bar ("forehead") and toolbar ("chin") from the background-color
+      // of the topmost position:fixed/sticky element flush with each viewport
+      // edge, and only falls back to <body>'s background-color.
+      //
+      // The catch that made every previous attempt look like a no-op: the body
+      // fallback is read ONCE, at first paint. Safari deliberately ignores later
+      // JS changes to it, so re-colouring on route change can never re-tint —
+      // in an SPA there is no second first paint, and every client-side
+      // navigation kept the entry route's bars (enter on '/', and /resume shows
+      // that route's light bars over its black page).
+      //
+      // The fixed-element channel *is* live: an element entering the render tree
+      // re-tints. That is what <BarTint> uses (see src/components/ui/BarTint.tsx).
+      // The values below decide first paint — for a deep link, and as the base
+      // the strips then confirm.
+      ;(function () {
+        // top/bottom default to bg; they differ only where the page's own two
+        // edges differ (contact: light form surface up top, shader band below).
         var PAGES = {
-          '/': ['#eef0f2', 'light'],
-          '/models': ['#d0d0d0', 'light'],
-          '/about': ['#d8d7d7', 'light'],
-          '/projects': ['#000000', 'dark'],
-          '/contact': ['#0b0b0b', 'dark'],
-          '/resume': ['#000000', 'dark'],
+          '/': { bg: '#eef0f2', scheme: 'light' },
+          '/models': { bg: '#d0d0d0', scheme: 'light' },
+          '/about': { bg: '#d8d7d7', scheme: 'light' },
+          '/projects': { bg: '#000000', scheme: 'dark' },
+          '/contact': { bg: '#0b0b0b', top: '#e9ebed', scheme: 'dark' },
+          '/resume': { bg: '#000000', scheme: 'dark' },
         }
-        var page = PAGES[path.replace(/\/+$/, '') || '/'] || PAGES['/']
-        var el = document.documentElement
-        el.style.setProperty('--page-bg', page[0])
-        el.style.colorScheme = page[1]
-      }
-      window.__pageTheme(location.pathname)
+        window.__pageTint = function (path) {
+          var p = PAGES[path.replace(/\/+$/, '') || '/'] || PAGES['/']
+          return { bg: p.bg, top: p.top || p.bg, bottom: p.bottom || p.bg, scheme: p.scheme }
+        }
+        window.__pageTheme = function (path) {
+          var tint = window.__pageTint(path)
+          var el = document.documentElement
+          el.style.setProperty('--page-bg', tint.bg)
+          el.style.colorScheme = tint.scheme
+        }
+        window.__pageTheme(location.pathname)
+      })()
     </script>
   </head>
   <body>

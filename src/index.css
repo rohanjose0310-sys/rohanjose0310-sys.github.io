@@ -63,6 +63,26 @@ html.touch .scene-layer {
   height: 100lvh;
 }
 
+/* The two strips iOS 26 Safari samples for its status-bar and toolbar tint —
+   mounted per route by <BarTint>, which is where the reasoning lives. They are
+   positioned and sized here; only their colour comes from the component. */
+.bar-tint {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 8px;
+  z-index: 2147483647;
+  pointer-events: none;
+}
+
+.bar-tint.top {
+  top: 0;
+}
+
+.bar-tint.bottom {
+  bottom: 0;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
