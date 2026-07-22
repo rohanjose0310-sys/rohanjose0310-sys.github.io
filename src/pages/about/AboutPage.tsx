@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { Preload, Scroll, ScrollControls } from '@react-three/drei'
 import { SceneCanvasLayout } from '../../layout/SceneCanvasLayout'
 import { AdaptiveMark } from '../../components/ui/Logo'
@@ -82,15 +81,9 @@ function AboutOverlay() {
   useVisualViewportInset()
   return (
     <div className="about-overlay">
-      {/* Desktop only — on phones the browser's own back gesture covers this,
-          and the corner is needed for the mark. */}
-      {!IS_TOUCH && (
-        <Link to="/" className="about-back">
-          ← back
-        </Link>
-      )}
       <div className="about-logo">
         <AdaptiveMark height={19.5} />
+        <span>Rohan Jose</span>
       </div>
       <div className="about-bio-lines">
         Coder to Designer
