@@ -157,21 +157,47 @@ export function Lens({
 // drei <Image> meshes expose zoom/grayscale on their shader material.
 type ImageMesh = THREE.Mesh & { material: { zoom: number; grayscale: number } }
 
-// Every X position/width below was tuned for a landscape desktop viewport
-// (~9 world units wide). Portrait phones are much narrower (~2.4 at typical
-// widths), so those literal X values ran the images half off-screen — the
-// grey gaps and cropped edges. Y is untouched: it already comes from the
-// real device `height`, so scroll pacing/timing is unaffected; only the
-// horizontal footprint shrinks to fit. drei's <Image> covers/crops to its
-// plane rather than stretching, so narrowing X just tightens the crop.
+// IMG1 and IMG6's X position/width were tuned for a landscape desktop
+// viewport (~9 world units wide). Portrait phones are much narrower (~2.4 at
+// typical widths), so those literal X values ran them half off-screen — the
+// grey gaps and cropped edges. Y is untouched: it already comes from the real
+// device `height`, so scroll pacing/timing is unaffected; only the horizontal
+// footprint shrinks to fit. drei's <Image> covers/crops to its plane rather
+// than stretching, so narrowing X just tightens the crop.
 const DESKTOP_DESIGN_WIDTH = 9
 const imgScaleX = (width: number) => (IS_TOUCH ? Math.min(1, width / DESKTOP_DESIGN_WIDTH) : 1)
+
+// TRIP2/IMG8/TRIP4 sit side by side on desktop — three columns spanning
+// -2.55..1.5 (width 4.05, gaps 0.45 and 0.1) across a wide viewport. Phones
+// are much narrower, so that literal layout ran mostly off-screen. Rather
+// than restack or resize the images individually, this scales the whole row
+// (positions, widths, gaps) down by one factor so it's the same three-across
+// composition, just shrunk edge-to-edge to the device width. Desktop is
+// untouched — TOUCH_ROW is only read when IS_TOUCH.
+const DESKTOP_ROW = [
+  { x: -2.05, w: 1 }, // TRIP2
+  { x: -0.6, w: 1 }, // IMG8
+  { x: 0.75, w: 1.5 }, // TRIP4
+]
+function touchRow(width: number) {
+  const gap = 0.08
+  const totalW = width - gap * (DESKTOP_ROW.length - 1)
+  const weightSum = DESKTOP_ROW.reduce((sum, item) => sum + item.w, 0)
+  let cursor = -width / 2
+  return DESKTOP_ROW.map((item) => {
+    const w = (item.w / weightSum) * totalW
+    const x = cursor + w / 2
+    cursor += w + gap
+    return { x, w }
+  })
+}
 
 export function Images() {
   const group = useRef<THREE.Group>(null!)
   const data = useScroll()
   const { width, height } = useThree((state) => state.viewport)
   const s = imgScaleX(width)
+  const row = IS_TOUCH ? touchRow(width) : DESKTOP_ROW
   useFrame(() => {
     const images = group.current.children as ImageMesh[]
     images[0].material.zoom = 1 + data.range(0, 1 / 3) / 3
@@ -182,14 +208,21 @@ export function Images() {
     images[5].material.grayscale = 1 - data.range(1.6 / 3, 1 / 3)
     images[6].material.zoom = 1 + (1 - data.range(2 / 3, 1 / 3)) / 3
   })
+  const [trip2, img8, trip4] = row
+  // Desktop spaces this row through Z too (6/9/10.5) — harmless side by side,
+  // since nothing there overlaps in X. But Z sets how fast an object crosses
+  // the screen under this perspective camera, so on touch, where the row now
+  // has to stay aligned as a single unit with no X gap to spare, that spread
+  // pulled the three apart at different speeds instead of moving as one row.
+  const [trip2Z, img8Z, trip4Z] = IS_TOUCH ? [8, 8, 8] : [6, 9, 10.5]
   return (
     <group ref={group}>
       <Image position={[-2 * s, 0, 0]} scale={[4 * s, height]} url={IMG1} />
       <Image position={[2 * s, 0, 3]} scale={[3 * s, 3]} url={IMG6} />
-      <Image position={[-2.05 * s, -height, 6]} scale={[1 * s, 3]} url={TRIP2} />
-      <Image position={[-0.6 * s, -height, 9]} scale={[1 * s, 2]} url={IMG8} />
-      <Image position={[0.75 * s, -height, 10.5]} scale={[1.5 * s, 1.5]} url={TRIP4} />
-      <Image position={[0, -height * 1.5, 7.5]} scale={[1.5 * s, 3]} url={IMG3} />
+      <Image position={[trip2.x, -height, trip2Z]} scale={[trip2.w, 3]} url={TRIP2} />
+      <Image position={[img8.x, -height, img8Z]} scale={[img8.w, 2]} url={IMG8} />
+      <Image position={[trip4.x, -height, trip4Z]} scale={[trip4.w, 1.5]} url={TRIP4} />
+      <Image position={[0, -height * 1.5, 7.5]} scale={[1.5, 3]} url={IMG3} />
       <Image position={[0, -height * 2 - height / 4, 0]} scale={[width, height / 1.1]} url={IMG7} />
     </group>
   )
