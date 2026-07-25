@@ -6,11 +6,14 @@ import { useLenis } from '../lib/lenis'
 import { Logo } from '../components/ui/Logo'
 import { BarTint } from '../components/ui/BarTint'
 import { applyPageTheme } from '../lib/pageTheme'
-import { HANDS_ENABLED } from '../gestures/flag'
+import { HANDS_DEBUG, HANDS_SUPPORTED } from '../gestures/flag'
 
-// Lazy so the gesture panel and its CSS stay out of the main bundle. The heavy
-// parts (MediaPipe wasm + the 7.8MB model) are further down still — they only
-// load when the user actually starts tracking.
+// Both lazy, so the gesture UI and its CSS stay out of the main bundle. The
+// heavy parts (MediaPipe wasm + the 7.8MB model) are further down still — they
+// only load when the visitor actually starts tracking.
+const HandControl = lazy(() =>
+  import('../gestures/HandControl').then((m) => ({ default: m.HandControl })),
+)
 const HandOverlay = lazy(() =>
   import('../gestures/HandOverlay').then((m) => ({ default: m.HandOverlay })),
 )
@@ -35,9 +38,12 @@ export function RootLayout() {
       <BarTint />
       <Logo />
       <Outlet />
-      {HANDS_ENABLED && (
+      {HANDS_SUPPORTED && (
         <Suspense fallback={null}>
-          <HandOverlay />
+          {/* Visitor opt-in: the invitation, primer, and stop control. */}
+          <HandControl />
+          {/* Developer calibration panel, on top, dev/?hands only. */}
+          {HANDS_DEBUG && <HandOverlay />}
         </Suspense>
       )}
     </>

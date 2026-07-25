@@ -1,0 +1,157 @@
+/* Visitor-facing hand-control entry. Bottom-centre, matching the live HUD's
+   spot so the invitation sits exactly where the running readout will replace
+   it. Light chip on the studio-grey home backdrop, the inverse of the dark
+   developer calibration panel. */
+
+.hand-control {
+  position: fixed;
+  bottom: calc(34px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 15px;
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(10px);
+  color: #111;
+  font: 500 12px/1.2 var(--sans);
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+button.hand-control {
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+button.hand-control:hover {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.hand-control--invite svg {
+  color: var(--accent);
+}
+
+/* Running: a discreet on/off with a live camera dot. */
+.hand-control--stop {
+  color: #111;
+}
+
+.hand-control__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(255, 106, 0, 0.5);
+  animation: hand-control-pulse 1.8s ease-out infinite;
+}
+
+@keyframes hand-control-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 106, 0, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 7px rgba(255, 106, 0, 0);
+  }
+}
+
+.hand-control__x {
+  margin-left: 2px;
+  opacity: 0.4;
+  font-size: 11px;
+}
+
+.hand-control--stop:hover .hand-control__x {
+  opacity: 0.8;
+}
+
+.hand-control__spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(17, 17, 17, 0.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: hand-control-spin 0.7s linear infinite;
+}
+
+@keyframes hand-control-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* The primer and the fallback are cards, not pills — they hold a paragraph. */
+.hand-control--primer,
+.hand-control--fallback {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: min(320px, calc(100vw - 40px));
+  padding: 16px;
+  border-radius: 14px;
+  white-space: normal;
+  text-align: left;
+}
+
+.hand-control--primer strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.hand-control--primer p,
+.hand-control--fallback p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.hand-control--primer b {
+  font-weight: 600;
+}
+
+.hand-control__privacy {
+  color: #6b6b6b !important;
+  font-size: 11px !important;
+}
+
+.hand-control__sub {
+  font-size: 11px;
+  color: #6b6b6b;
+}
+
+.hand-control__row {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.hand-control__btn {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid rgba(17, 17, 17, 0.16);
+  border-radius: 8px;
+  background: transparent;
+  color: #111;
+  font: 500 12px/1 var(--sans);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.hand-control__btn:hover {
+  background: rgba(17, 17, 17, 0.05);
+}
+
+.hand-control__btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.hand-control__btn--primary:hover {
+  background: #ff7d1f;
+}
