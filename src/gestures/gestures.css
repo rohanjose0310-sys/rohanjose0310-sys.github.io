@@ -1,0 +1,253 @@
+/* Calibration panel for the hand pipeline. Deliberately utilitarian — it is an
+   instrument, not part of the site's design language. It sits below <BarTint>
+   and <Logo> (both at max z-index) but above every page's canvas. */
+
+.hand-overlay {
+  position: fixed;
+  right: 16px;
+  /* Top-right, not bottom-right: the home carousel's cards and its scrolling
+     name banner sweep across the lower half of the viewport, which is exactly
+     where gestures are aimed. */
+  top: 16px;
+  z-index: 2147483000;
+  width: 240px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  /* Opaque enough to stay legible over both the white studio backdrop on / and
+     the black prism scene on /projects. */
+  background: rgba(14, 16, 20, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  font: 11px/1.4 var(--mono);
+  color: rgba(255, 255, 255, 0.72);
+  user-select: none;
+}
+
+.hand-overlay.is-collapsed {
+  width: auto;
+}
+
+.hand-overlay header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hand-overlay header strong {
+  letter-spacing: 0.12em;
+  color: #fff;
+}
+
+.hand-status {
+  margin-left: auto;
+  opacity: 0.6;
+}
+
+.hand-overlay header button {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hand-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #555;
+}
+.hand-dot--running {
+  background: #3ddc84;
+  box-shadow: 0 0 6px #3ddc84;
+}
+.hand-dot--loading {
+  background: var(--accent);
+  animation: hand-pulse 1s ease-in-out infinite;
+}
+.hand-dot--error,
+.hand-dot--denied {
+  background: #ff4444;
+}
+
+@keyframes hand-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.hand-overlay canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 8px;
+  border-radius: 6px;
+  background: #14161a;
+}
+
+.hand-readout {
+  margin-top: 8px;
+}
+
+.hand-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.hand-row span {
+  opacity: 0.55;
+}
+
+.hand-row b {
+  color: #fff;
+  font-weight: 500;
+  /* Tabular figures so the live numbers don't shuffle sideways each frame. */
+  font-variant-numeric: tabular-nums;
+}
+
+.hand-row.is-active b {
+  color: var(--accent);
+}
+
+/* Per-finger extension bars: a fast visual read on why a pose did or didn't
+   classify, which is most of what calibration actually needs. */
+.hand-curls {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.hand-curl {
+  flex: 1;
+  text-align: center;
+}
+
+.hand-curl span {
+  display: block;
+  opacity: 0.4;
+  font-size: 9px;
+}
+
+.hand-curl i {
+  display: block;
+  height: 18px;
+  margin-top: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform-origin: bottom;
+  outline: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.hand-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.hand-actions button {
+  flex: 1;
+  padding: 5px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.hand-actions button:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* Restart-scoped runtime settings. The right values are machine-specific, so
+   these are controls rather than constants. */
+.hand-runtime {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.hand-runtime label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hand-runtime span {
+  opacity: 0.5;
+  font-size: 9px;
+}
+
+.hand-runtime select {
+  width: 100%;
+  padding: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font: inherit;
+  font-size: 10px;
+}
+
+.hand-message {
+  margin: 6px 0 0;
+  color: #ff8a8a;
+}
+
+.hand-hint {
+  margin: 6px 0 0;
+  opacity: 0.55;
+  font-size: 10px;
+}
+
+.hand-hint kbd {
+  padding: 0 3px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  font: inherit;
+}
+
+.hand-tuning {
+  margin-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 6px;
+}
+
+.hand-tuning summary {
+  opacity: 0.55;
+  cursor: pointer;
+}
+
+.hand-slider {
+  display: grid;
+  grid-template-columns: 58px 1fr 38px;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.hand-slider span {
+  opacity: 0.55;
+  font-size: 10px;
+}
+
+.hand-slider input {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.hand-slider b {
+  color: #fff;
+  font-weight: 500;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}

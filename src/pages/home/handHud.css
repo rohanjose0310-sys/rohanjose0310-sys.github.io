@@ -1,0 +1,68 @@
+/* Hand-mode HUD for the home carousel. Bottom-centre, clear of HeroText's
+   bottom-left caption and of the calibration panel at top-right. */
+
+.hand-hud {
+  position: fixed;
+  bottom: calc(34px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 14px;
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  border-radius: 999px;
+  /* The home backdrop is a light studio grey, so this is a light chip with dark
+     text — the inverse of the dark calibration panel, which is debug chrome. */
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(10px);
+  color: #111;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0.5;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+/* Dimmed until a hand is actually in frame, so it reads as "waiting" rather
+   than as a permanent label. */
+.hand-hud.is-live {
+  opacity: 1;
+}
+
+.hand-hud__card {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.hand-hud__hint {
+  opacity: 0.55;
+  font-size: 11px;
+}
+
+/* Pinch acceptance. Deliberately visible: the gate takes 90-170ms depending on
+   inference rate, and watching it fill is what turns that from lag into
+   feedback. */
+.hand-hud__pinch {
+  width: 46px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(17, 17, 17, 0.14);
+  overflow: hidden;
+}
+
+.hand-hud__pinch i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+.hand-hud__pinch.is-pinching {
+  background: rgba(255, 106, 0, 0.2);
+}

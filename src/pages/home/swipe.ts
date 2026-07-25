@@ -19,4 +19,30 @@ export const swipe = {
   travel: 0,
   /** Revolutions the carousel actually turned last frame, from all inputs. */
   delta: 0,
+  /**
+   * ScrollControls' contribution to the rotation, published by <Rig>.
+   *
+   * Only this half is republished, rather than the combined rotation: it is the
+   * half that lives inside drei's ScrollControls context and so can't be read
+   * from outside the Canvas. Deliberately *not* the total — that would make the
+   * hand controller's idea of "which card is in front" depend on <Rig> having
+   * rendered a frame, and a stalled frameloop would then make a pinch navigate
+   * to the wrong card. Composing it with the live `offset` instead keeps the
+   * hand-driven half always current.
+   */
+  scrollOffset: 0,
+}
+
+/**
+ * The carousel's current rotation in revolutions, from all inputs combined.
+ * Mirrors the calculation in <Rig>, which owns the authoritative version.
+ */
+export function currentTurns(): number {
+  return swipe.offset - swipe.scrollOffset
+}
+
+// Dev-only handle for console poking and automated checks, matching the one
+// gestures/store.ts exposes for `hand`.
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  ;(window as unknown as { swipe: typeof swipe }).swipe = swipe
 }

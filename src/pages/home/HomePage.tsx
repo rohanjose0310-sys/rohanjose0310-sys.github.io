@@ -1,6 +1,8 @@
 import { SceneCanvasLayout } from '../../layout/SceneCanvasLayout'
 import { HeroText } from '../../components/ui/HeroText'
 import { CardScene } from './CardScene'
+import { HandCarousel } from './HandCarousel'
+import { HANDS_ENABLED } from '../../gestures/flag'
 
 export function HomePage() {
   return (
@@ -9,6 +11,9 @@ export function HomePage() {
         <CardScene />
       </SceneCanvasLayout>
       <HeroText />
+      {/* Renders nothing until hand tracking is actually running; the carousel's
+          mouse and touch paths are untouched either way. */}
+      {HANDS_ENABLED && <HandCarousel />}
     </>
   )
 }

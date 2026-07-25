@@ -212,6 +212,8 @@ function Rig(props: { rotation: [number, number, number]; children: React.ReactN
     // Rotate contents: wheel scroll and drag offsets combine
     const turns = swipe.offset - scroll.offset
     swipe.delta = Math.abs(turns - prevTurns.current)
+    // Republished so code outside the Canvas can reconstruct `turns` — see swipe.ts.
+    swipe.scrollOffset = scroll.offset
     prevTurns.current = turns
     ref.current.rotation.y = turns * (Math.PI * 2)
     // Raycasts every frame rather than on pointer-move. Skipped on touch,
