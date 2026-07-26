@@ -59,6 +59,9 @@ const OPEN_PALM: SyntheticPose = { index: 0, middle: 0, ring: 0, pinky: 0, pinch
 const FIST: SyntheticPose = { index: 1, middle: 1, ring: 1, pinky: 1, pinch: 0.75 }
 const PINCH: SyntheticPose = { index: 0, middle: 0, ring: 0, pinky: 0, pinch: 1 }
 const POINT: SyntheticPose = { index: 0, middle: 1, ring: 1, pinky: 1, pinch: 0 }
+// Thumb, index, middle up; ring, pinky curled. pinch:0 leaves the thumb in its
+// default splayed-out position, which the classifier reads as extended.
+const THREE: SyntheticPose = { index: 0, middle: 0, ring: 1, pinky: 1, pinch: 0 }
 
 /** Build a 21-point hand in local space, +Y toward the fingertips. */
 function buildLocal(pose: SyntheticPose): Landmark[] {
@@ -176,6 +179,7 @@ export class SyntheticSource {
     if (this.held.has('f')) return FIST
     if (this.held.has('p') || this.mouseDown) return PINCH
     if (this.held.has('i')) return POINT
+    if (this.held.has('3')) return THREE
     return OPEN_PALM
   }
 

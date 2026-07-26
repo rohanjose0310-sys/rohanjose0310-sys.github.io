@@ -164,6 +164,21 @@ export function classify(
 
     if (fingers.every(ext)) return 'open_palm'
     if (ext(curls.index) && cur(curls.middle) && cur(curls.ring) && cur(curls.pinky)) return 'point'
+    // "Three": thumb, index and middle up, ring and pinky curled — the back
+    // gesture. Disjoint from every pose above: fist/open_palm differ on the
+    // extended set, point has the middle curled, and pinch is ruled out because
+    // its openness gate (mean of middle/ring/pinky) fails with ring and pinky
+    // curled. Requiring the thumb up is what separates it from a peace sign,
+    // matching the deliberate three-finger shape.
+    if (
+      ext(curls.thumb) &&
+      ext(curls.index) &&
+      ext(curls.middle) &&
+      cur(curls.ring) &&
+      cur(curls.pinky)
+    ) {
+      return 'three'
+    }
     return 'none'
   }
 }

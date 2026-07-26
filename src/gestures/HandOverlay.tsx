@@ -26,6 +26,7 @@ const POSE_LABEL: Record<Pose, string> = {
   fist: 'FIST',
   pinch: 'PINCH',
   point: 'POINT',
+  three: 'THREE',
 }
 
 export function HandOverlay() {
@@ -209,7 +210,7 @@ export function HandOverlay() {
           {ui.source === 'synthetic' && running && (
             <p className="hand-hint">
               mouse = move · <kbd>F</kbd> fist · <kbd>P</kbd>/click pinch · <kbd>I</kbd> point ·{' '}
-              <kbd>H</kbd> out of frame
+              <kbd>3</kbd> three · <kbd>H</kbd> out of frame
             </p>
           )}
 

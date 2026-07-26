@@ -58,7 +58,7 @@ export const HAND_CONNECTIONS: [number, number][] = [
  * confusion grows fast past that, and every extra pose steals recall from the
  * ones that matter.
  */
-export type Pose = 'none' | 'open_palm' | 'fist' | 'pinch' | 'point'
+export type Pose = 'none' | 'open_palm' | 'fist' | 'pinch' | 'point' | 'three'
 
 export type HandSource = 'camera' | 'synthetic'
 
