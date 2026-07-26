@@ -48,6 +48,8 @@ export const hand = {
   poseProgress: 0,
   present: false,
   pinchDistance: 1,
+  /** Thumb-tip to index-MCP distance / span. Low = tucked (peace), high = up (three). */
+  thumbSpread: 1,
   /** Wrist->middle-MCP span. Larger = hand closer to the camera. */
   span: 0,
   curls: { thumb: 0, index: 0, middle: 0, ring: 0, pinky: 0 } as FingerCurls,
@@ -99,6 +101,7 @@ export function resetHand() {
   hand.vx = 0
   hand.vy = 0
   hand.pinchDistance = 1
+  hand.thumbSpread = 1
   hand.span = 0
   handUI.present = false
   handUI.pose = 'none'

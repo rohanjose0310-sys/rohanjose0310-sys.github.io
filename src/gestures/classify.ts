@@ -25,6 +25,8 @@ export interface PoseAnalysis {
   curls: FingerCurls
   /** Thumb-tip to index-tip distance, normalized by hand span. */
   pinchDistance: number
+  /** Thumb-tip to index-MCP distance, normalized by span. Low = tucked across the palm. */
+  thumbSpread: number
   /** Wrist to middle-MCP distance in normalized frame units — our depth proxy. */
   span: number
 }
@@ -54,6 +56,18 @@ export interface Thresholds {
    * navigation.
    */
   pinchOpen: number
+  /**
+   * Thumb-tip-to-index-MCP distance (span-normalized) below which the thumb
+   * counts as tucked across the palm.
+   *
+   * This is what separates a peace sign (thumb tucked — goes back) from a three
+   * (thumb up — does nothing). Deliberately a *distance* rather than the thumb's
+   * joint-angle extension: tucking the thumb is mostly adduction across the palm
+   * rather than bending, so the distance carries far more signal. Measured on
+   * the synthetic hand, distance separates the two shapes by ~64x the noise
+   * versus ~26x for joint angles.
+   */
+  thumbTucked: number
 }
 
 export const DEFAULT_THRESHOLDS: Thresholds = {
@@ -73,6 +87,10 @@ export const DEFAULT_THRESHOLDS: Thresholds = {
   // ~0.78 a relaxed pinch stops registering. 0.75 clears every misfire with a
   // margin before deliberate pinches are lost.
   pinchOpen: 0.75,
+  // Midway between a tucked thumb (~0.12) and one held up (~0.79). Every other
+  // pose sits clearly on one side: fist 0.07 tucked, open palm / point / pinch
+  // ~0.79-0.88 up.
+  thumbTucked: 0.45,
 }
 
 function dist(a: Landmark, b: Landmark): number {
@@ -133,10 +151,11 @@ export function classify(
   }
 
   const pinchDistance = dist(lms[LM.THUMB_TIP], lms[LM.INDEX_TIP]) / span
+  const thumbSpread = dist(lms[LM.THUMB_TIP], lms[LM.INDEX_MCP]) / span
   const ext = (v: number) => v >= thresholds.fingerSplit
   const cur = (v: number) => v < thresholds.fingerSplit
 
-  return { pose: pick(), curls, pinchDistance, span }
+  return { pose: pick(), curls, pinchDistance, thumbSpread, span }
 
   function pick(): Pose {
     const fingers = [curls.index, curls.middle, curls.ring, curls.pinky]
@@ -173,14 +192,22 @@ export function classify(
 
     if (fingers.every(ext)) return 'open_palm'
     if (ext(curls.index) && cur(curls.middle) && cur(curls.ring) && cur(curls.pinky)) return 'point'
-    // "Three" / peace: index and middle up, ring and pinky curled — the back
-    // gesture. The thumb is intentionally not required: it's the least reliable
-    // landmark, and whether it's up (three) or tucked (peace) the shape is the
-    // same deliberate one, so both should go back. Disjoint from every pose
-    // above: fist/open_palm differ on the extended set, point has the middle
-    // curled, and pinch is ruled out by its openness gate with ring+pinky curled.
+    // Two fingers up, ring and pinky curled. The thumb then decides which of the
+    // two poses it is, and only 'peace' means back:
+    //
+    //   thumb tucked across the palm -> 'peace'  (the back gesture)
+    //   thumb held up / out          -> 'three'  (deliberately inert)
+    //
+    // Splitting them matters because both shapes are easy to make by accident
+    // when the other is intended; keeping 'three' as its own pose (rather than
+    // folding it into 'none') also lets the calibration panel show which one a
+    // hand is actually making.
+    //
+    // Both are disjoint from everything above: fist/open_palm differ on the
+    // extended set, point has the middle curled, and pinch is ruled out by its
+    // openness gate with ring and pinky curled.
     if (ext(curls.index) && ext(curls.middle) && cur(curls.ring) && cur(curls.pinky)) {
-      return 'three'
+      return thumbSpread < thresholds.thumbTucked ? 'peace' : 'three'
     }
     return 'none'
   }

@@ -52,6 +52,15 @@ export interface SyntheticPose {
   pinky: number
   /** 0 = thumb out, 1 = thumb tip on the index tip. */
   pinch: number
+  /**
+   * 0 = thumb splayed out, 1 = thumb folded in across the palm.
+   *
+   * Distinct from `pinch`: that reaches the thumb *up* to the index tip, this
+   * folds it *in* toward the base of the index finger. It's what separates a
+   * peace sign (thumb tucked) from a three (thumb up), so it has to be modelled
+   * rather than approximated with `pinch`.
+   */
+  thumbTuck?: number
 }
 
 const OPEN_PALM: SyntheticPose = { index: 0, middle: 0, ring: 0, pinky: 0, pinch: 0 }
@@ -62,8 +71,12 @@ const OPEN_PALM: SyntheticPose = { index: 0, middle: 0, ring: 0, pinky: 0, pinch
 const FIST: SyntheticPose = { index: 1, middle: 1, ring: 1, pinky: 1, pinch: 0.75 }
 const PINCH: SyntheticPose = { index: 0, middle: 0, ring: 0, pinky: 0, pinch: 1 }
 const POINT: SyntheticPose = { index: 0, middle: 1, ring: 1, pinky: 1, pinch: 0 }
-// Thumb, index, middle up; ring, pinky curled. pinch:0 leaves the thumb in its
-// default splayed-out position, which the classifier reads as extended.
+// Peace: index and middle up, ring and pinky curled, thumb folded in across the
+// palm. This is the back gesture.
+const PEACE: SyntheticPose = { index: 0, middle: 0, ring: 1, pinky: 1, pinch: 0, thumbTuck: 0.85 }
+// Three: the same fingers, but the thumb splayed out. Deliberately kept as a
+// separate pose so the classifier can be shown to distinguish it from peace —
+// only peace goes back.
 const THREE: SyntheticPose = { index: 0, middle: 0, ring: 1, pinky: 1, pinch: 0 }
 
 /** Build a 21-point hand in local space, +Y toward the fingertips. */
@@ -106,18 +119,21 @@ function buildLocal(pose: SyntheticPose): Landmark[] {
     ty += Math.cos(thumbAngle) * thumbLengths[i]
     lms[thumbIdx[i]] = { x: tx, y: ty, z: 0 }
   }
-  if (pose.pinch > 0) {
-    const target = lms[LM.INDEX_TIP]
-    // The tip travels the full distance, the joints proportionally less, so the
-    // thumb folds rather than translating rigidly.
+  // The tip travels the full distance, the joints proportionally less, so the
+  // thumb folds rather than translating rigidly.
+  const foldThumb = (target: Landmark, amount: number) => {
     const weights = [0.25, 0.6, 1]
     for (let i = 0; i < 3; i++) {
       const lm = lms[thumbIdx[i]]
-      const t = pose.pinch * weights[i]
+      const t = amount * weights[i]
       lm.x += (target.x - lm.x) * t
       lm.y += (target.y - lm.y) * t
     }
   }
+  if (pose.pinch > 0) foldThumb(lms[LM.INDEX_TIP], pose.pinch)
+  // Tuck folds toward the *base* of the index finger — across the palm, where a
+  // tucked thumb actually sits — rather than up to the fingertip.
+  if (pose.thumbTuck) foldThumb(lms[LM.INDEX_MCP], pose.thumbTuck)
   return lms
 }
 
@@ -182,6 +198,7 @@ export class SyntheticSource {
     if (this.held.has('f')) return FIST
     if (this.held.has('p') || this.mouseDown) return PINCH
     if (this.held.has('i')) return POINT
+    if (this.held.has('2')) return PEACE
     if (this.held.has('3')) return THREE
     return OPEN_PALM
   }

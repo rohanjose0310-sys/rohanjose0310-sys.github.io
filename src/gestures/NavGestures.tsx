@@ -4,12 +4,14 @@
 // there is nothing to go "back" from. Everywhere else:
 //
 //   open palm, dragged vertically   -> scroll   (via the NavGestureEngine)
-//   the "three" pose (thumb+index+middle up) -> back  (-> navigate home)
+//   peace sign (two fingers, thumb tucked) -> back  (-> navigate home)
 //
 // Back is a static pose rather than a swipe: a directional flick was unreliable
 // to trigger, and a distinct hand shape can never be confused with the scroll
-// drag. It reads the *committed* (stability-gated) pose, so a transient misread
-// can't navigate, and fires on the rising edge so one gesture goes back once.
+// drag. Specifically the *peace* pose and not 'three' (same fingers, thumb up),
+// which stays inert — see classify.ts. It reads the *committed* (stability-gated)
+// pose, so a transient misread can't navigate, and fires on the rising edge so
+// one gesture goes back once.
 
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -27,7 +29,7 @@ export function NavGestures() {
   const navigate = useNavigate()
   // Home drives its own gestures (the carousel); back has no meaning there.
   const active = ui.status === 'running' && pathname !== '/'
-  const wasThree = useRef(false)
+  const wasPeace = useRef(false)
 
   useEffect(() => {
     if (!active) return
@@ -49,9 +51,9 @@ export function NavGestures() {
       // the stability gate has already vetted it; rising edge so holding the
       // pose fires exactly one navigation. Navigating unmounts this effect, so
       // there's no second fire from the same hold.
-      const three = hand.pose === 'three'
-      if (three && !wasThree.current) navigate('/')
-      wasThree.current = three
+      const peace = hand.pose === 'peace'
+      if (peace && !wasPeace.current) navigate('/')
+      wasPeace.current = peace
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
@@ -83,7 +85,7 @@ function NavHud({ scrollable }: { scrollable: boolean }) {
       )}
       {scrollable && <span className="nav-hud__sep">·</span>}
       <span>
-        <b>three fingers</b> to go back
+        <b>✌ peace sign</b> to go back
       </span>
     </div>
   )

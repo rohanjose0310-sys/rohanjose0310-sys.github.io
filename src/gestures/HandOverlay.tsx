@@ -26,7 +26,8 @@ const POSE_LABEL: Record<Pose, string> = {
   fist: 'FIST',
   pinch: 'PINCH',
   point: 'POINT',
-  three: 'THREE',
+  peace: 'PEACE (back)',
+  three: 'THREE (inert)',
 }
 
 export function HandOverlay() {
@@ -210,7 +211,7 @@ export function HandOverlay() {
           {ui.source === 'synthetic' && running && (
             <p className="hand-hint">
               mouse = move · <kbd>F</kbd> fist · <kbd>P</kbd>/click pinch · <kbd>I</kbd> point ·{' '}
-              <kbd>3</kbd> three · <kbd>H</kbd> out of frame
+              <kbd>2</kbd> peace · <kbd>3</kbd> three · <kbd>H</kbd> out of frame
             </p>
           )}
 
@@ -248,6 +249,15 @@ export function HandOverlay() {
               max={0.95}
               value={tuning.pinchOpen}
               onChange={(v) => setTuning((t) => ({ ...t, pinchOpen: v }))}
+            />
+            {/* Below this the thumb counts as tucked, making a two-finger shape
+                a peace sign (back) rather than an inert three. */}
+            <Slider
+              label="thumb tuck"
+              min={0.15}
+              max={0.8}
+              value={tuning.thumbTucked}
+              onChange={(v) => setTuning((t) => ({ ...t, thumbTucked: v }))}
             />
             <Slider
               label="minCutoff"
@@ -291,6 +301,8 @@ function LiveRows({ split }: { split: number }) {
   return (
     <>
       <Row label="pinch d" value={hand.pinchDistance.toFixed(3)} />
+      {/* Low = thumb tucked across the palm (peace); high = thumb up (three). */}
+      <Row label="thumb sp" value={hand.thumbSpread.toFixed(3)} />
       <Row label="span" value={hand.span.toFixed(3)} />
       <Row label="cursor" value={`${hand.x.toFixed(2)}, ${hand.y.toFixed(2)}`} />
       {/* Achieved vs target: when these diverge, inference is overrunning its

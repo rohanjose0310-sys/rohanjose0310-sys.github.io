@@ -196,6 +196,7 @@ export class HandTracker {
     hand.y = y
     hand.present = true
     hand.pinchDistance = analysis.pinchDistance
+    hand.thumbSpread = analysis.thumbSpread
     hand.span = analysis.span
     hand.curls = analysis.curls
 
