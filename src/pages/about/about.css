@@ -15,18 +15,19 @@
   font-size: 13px;
 }
 
-.about-back {
+.about-logo {
   position: absolute;
   top: 40px;
   left: 40px;
-  text-decoration: none;
-  pointer-events: all;
-}
-
-.about-logo {
-  position: absolute;
-  top: 72px;
-  left: 40px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--about-back-ink, #000);
+  transition: color 0.25s ease;
   pointer-events: none;
 }
 
@@ -74,8 +75,6 @@ html.touch .about-signoff {
   bottom: calc(var(--about-vv-inset, 0px) + 20px + env(safe-area-inset-bottom));
   right: 24px;
 }
-/* No back link on touch (see AboutPage), so the mark takes the top slot it
-   used to sit below rather than leaving a gap in the corner. */
 html.touch .about-logo {
   top: calc(20px + env(safe-area-inset-top));
   left: 24px;
@@ -109,14 +108,3 @@ html.touch .about-logo {
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
 }
 
-/* Auto-contrast the back button against whatever image scrolls behind it.
-   Ink var is set per-frame from a luminance readback of the scene buffer (see
-   LensScene bufferLuma) — mix-blend-mode can't blend over a WebGL canvas in
-   Safari. Default to black for the light backdrop before the first sample.
-   Desktop only, since the link itself is (see AboutPage) — but the same
-   readback still drives the logo mark on touch, which crossfades via
-   --about-logo-ink (see Logo.tsx AdaptiveMark). */
-.about-back {
-  color: var(--about-back-ink, #000);
-  transition: color 0.25s ease;
-}
