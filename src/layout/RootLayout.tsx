@@ -14,6 +14,9 @@ import { HANDS_DEBUG, HANDS_SUPPORTED } from '../gestures/flag'
 const HandControl = lazy(() =>
   import('../gestures/HandControl').then((m) => ({ default: m.HandControl })),
 )
+const NavGestures = lazy(() =>
+  import('../gestures/NavGestures').then((m) => ({ default: m.NavGestures })),
+)
 const HandOverlay = lazy(() =>
   import('../gestures/HandOverlay').then((m) => ({ default: m.HandOverlay })),
 )
@@ -42,6 +45,8 @@ export function RootLayout() {
         <Suspense fallback={null}>
           {/* Visitor opt-in: the invitation, primer, and stop control. */}
           <HandControl />
+          {/* Back/scroll gestures on every page except home (self-gating). */}
+          <NavGestures />
           {/* Developer calibration panel, on top, dev/?hands only. */}
           {HANDS_DEBUG && <HandOverlay />}
         </Suspense>

@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Preload, Scroll, ScrollControls } from '@react-three/drei'
+import { Preload, Scroll, ScrollControls, useScroll } from '@react-three/drei'
 import { SceneCanvasLayout } from '../../layout/SceneCanvasLayout'
 import { AdaptiveMark } from '../../components/ui/Logo'
 import { Images, Lens, Typography } from './LensScene'
 import { IS_TOUCH } from '../../lib/touch'
+import { HANDS_SUPPORTED } from '../../gestures/flag'
+import { registerScrollSink } from '../../gestures/navIntent'
 import './about.css'
 
 const BIO_COPY =
@@ -26,6 +28,7 @@ export function AboutPage() {
         dpr={IS_TOUCH ? [1, 1.5] : [1, 2]}
       >
         <ScrollControls damping={0.2} pages={3} distance={0.5}>
+          {HANDS_SUPPORTED && <HandScroll />}
           <Lens>
             <Scroll>
               <Typography />
@@ -48,6 +51,24 @@ export function AboutPage() {
       <AboutOverlay />
     </>
   )
+}
+
+// Hand-scroll consumer: while mounted, a vertical open-hand drag scrolls this
+// page's ScrollControls element. Lives inside the Canvas because that element
+// only exists in the ScrollControls context. ScrollControls' own damping (0.2)
+// smooths the scene, so we just push scrollTop and let it ease.
+function HandScroll() {
+  const scroll = useScroll()
+  useEffect(
+    () =>
+      registerScrollSink((deltaNormalized) => {
+        const el = scroll.el
+        const max = el.scrollHeight - el.clientHeight
+        el.scrollTop = Math.max(0, Math.min(max, el.scrollTop + deltaNormalized * el.clientHeight))
+      }),
+    [scroll],
+  )
+  return null
 }
 
 // Keep --about-vv-inset in sync with the gap the iOS Safari bottom toolbar

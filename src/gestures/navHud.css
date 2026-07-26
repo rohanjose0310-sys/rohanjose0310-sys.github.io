@@ -1,0 +1,38 @@
+/* Back/scroll hint for inner pages. Bottom-centre like the home HUD, but these
+   pages vary from light (about) to black (projects/resume), so it carries its
+   own contrast rather than assuming a background. */
+
+.nav-hud {
+  position: fixed;
+  bottom: calc(34px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(20, 22, 26, 0.62);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.82);
+  font: 500 12px/1 var(--sans);
+  white-space: nowrap;
+  opacity: 0.4;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.nav-hud.is-live {
+  opacity: 0.9;
+}
+
+.nav-hud b {
+  font-weight: 700;
+  color: #fff;
+}
+
+.nav-hud__sep {
+  opacity: 0.4;
+}

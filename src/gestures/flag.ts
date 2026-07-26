@@ -36,5 +36,10 @@ export const HANDS_SUPPORTED =
 export const HANDS_DEBUG =
   HANDS_SUPPORTED && (DEBUG || new URLSearchParams(window.location.search).has('hands'))
 
-/** Routes where a gesture currently does something. Home only until phase 3. */
-export const GESTURE_ROUTES = new Set(['/'])
+/**
+ * Routes where the opt-in invite is offered — the pages with a rich hand
+ * interaction worth advertising (home's carousel, about's scroll). Back works
+ * on every non-home page once tracking is running (see NavGestures), but a
+ * static page isn't worth an invite of its own.
+ */
+export const GESTURE_ROUTES = new Set(['/', '/about'])
