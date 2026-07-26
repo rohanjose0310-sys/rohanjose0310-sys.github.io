@@ -151,7 +151,7 @@ export function HandOverlay() {
 
           <div className="hand-readout">
             <Row label="pose" value={POSE_LABEL[ui.pose]} highlight={ui.pose !== 'none'} />
-            <LiveRows />
+            <LiveRows split={tuning.fingerSplit} />
           </div>
 
           <div className="hand-actions">
@@ -216,19 +216,14 @@ export function HandOverlay() {
 
           <details className="hand-tuning">
             <summary>calibration</summary>
+            {/* The extended/curled boundary. Watch the curl bars below: set it
+                between where a finger sits curled and where it sits extended. */}
             <Slider
-              label="extended"
-              min={0.5}
-              max={1}
-              value={tuning.extended}
-              onChange={(v) => setTuning((t) => ({ ...t, extended: v }))}
-            />
-            <Slider
-              label="curled"
-              min={0.2}
-              max={0.7}
-              value={tuning.curled}
-              onChange={(v) => setTuning((t) => ({ ...t, curled: v }))}
+              label="finger split"
+              min={0.4}
+              max={0.85}
+              value={tuning.fingerSplit}
+              onChange={(v) => setTuning((t) => ({ ...t, fingerSplit: v }))}
             />
             <Slider
               label="pinch on"
@@ -282,7 +277,7 @@ export function HandOverlay() {
  * in its own component so the re-render it causes can't touch the canvas or the
  * sliders above it.
  */
-function LiveRows() {
+function LiveRows({ split }: { split: number }) {
   const [, force] = useState(0)
   useEffect(() => {
     let raf = 0
@@ -305,13 +300,27 @@ function LiveRows() {
         value={`${hand.fps}/${handSettings.inferenceHz} Hz · ${hand.inferenceMs.toFixed(1)} ms`}
         highlight={hand.fps > 0 && hand.fps < handSettings.inferenceHz - 2}
       />
+      {/* Per-finger extension. Each bar is coloured by which side of the split
+          it's on (orange = extended, grey = curled) with the split drawn as a
+          line, and the number printed — so calibration is just "put the line
+          between the curled fingers and the extended ones". */}
       <div className="hand-curls">
-        {(['thumb', 'index', 'middle', 'ring', 'pinky'] as const).map((finger) => (
-          <div key={finger} className="hand-curl">
-            <span>{finger[0]}</span>
-            <i style={{ transform: `scaleY(${hand.curls[finger].toFixed(3)})` }} />
-          </div>
-        ))}
+        {(['thumb', 'index', 'middle', 'ring', 'pinky'] as const).map((finger) => {
+          const v = hand.curls[finger]
+          return (
+            <div key={finger} className="hand-curl">
+              <span>{finger[0]}</span>
+              <div className="hand-curl__bar">
+                <i
+                  className={v >= split ? 'is-ext' : 'is-cur'}
+                  style={{ transform: `scaleY(${v.toFixed(3)})` }}
+                />
+                <u style={{ bottom: `${(split * 100).toFixed(0)}%` }} />
+              </div>
+              <b>{v.toFixed(2)}</b>
+            </div>
+          )
+        })}
       </div>
     </>
   )

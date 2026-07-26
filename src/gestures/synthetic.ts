@@ -34,12 +34,15 @@ const FINGERS: Record<'index' | 'middle' | 'ring' | 'pinky', FingerSpec> = {
   pinky: { mcp: [0.62, 0.85], baseAngle: deg(24), lengths: [0.33, 0.2, 0.17] },
 }
 
-// Bend applied at each joint at full curl. Chosen so a fully curled finger
-// lands near 0.36 extension and a straight one at 1.0 — comfortably either side
-// of the classifier's 0.42/0.72 thresholds, with room to spare for the noise.
-const MCP_BEND = deg(45)
-const PIP_BEND = deg(120)
-const DIP_BEND = deg(110)
+// Bend applied at each joint at full curl. Tuned so a curled finger lands near
+// ~0.5 extension — a *realistic* curl (each joint folded ~90°), not the extreme
+// fist-to-palm fold. The earlier, tighter values (curl ≈ 0.36) over-separated
+// the poses and hid a real bug: on an actual hand a "curled" ring/pinky reads
+// around 0.5, which the old 0.42 curled-threshold rejected. Keep this honest so
+// the classifier is tested against the range a webcam really produces.
+const MCP_BEND = deg(38)
+const PIP_BEND = deg(92)
+const DIP_BEND = deg(82)
 
 export interface SyntheticPose {
   /** 0 = straight, 1 = fully curled, per finger. */

@@ -135,14 +135,47 @@
   font-size: 9px;
 }
 
-.hand-curl i {
+.hand-curl b {
   display: block;
-  height: 18px;
   margin-top: 2px;
-  border-radius: 2px;
-  background: var(--accent);
-  transform-origin: bottom;
+  font-size: 9px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.hand-curl__bar {
+  position: relative;
+  height: 22px;
+  margin-top: 2px;
   outline: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.hand-curl__bar i {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  transform-origin: bottom;
+}
+
+.hand-curl__bar i.is-ext {
+  background: var(--accent);
+}
+
+.hand-curl__bar i.is-cur {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* The split line — the extended/curled boundary, drawn across every bar. */
+.hand-curl__bar u {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #fff;
+  opacity: 0.7;
 }
 
 .hand-actions {

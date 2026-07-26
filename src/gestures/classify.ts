@@ -30,10 +30,17 @@ export interface PoseAnalysis {
 }
 
 export interface Thresholds {
-  /** Above this, a finger counts as extended. */
-  extended: number
-  /** Below this, a finger counts as curled. */
-  curled: number
+  /**
+   * The single extended/curled boundary: a finger reading at or above this is
+   * extended, below it is curled.
+   *
+   * One threshold, not an extended/curled pair with a gap between them. The gap
+   * was a trap: the extension metric puts a finger curled to ~90° at each joint
+   * near 0.5, which fell into a 0.42–0.72 dead zone and read as *neither*, so
+   * every pose that needs a curled finger (fist, point, three) silently failed
+   * on a real hand while open-palm and pinch still worked.
+   */
+  fingerSplit: number
   /** Pinch engages below this (normalized by span). */
   pinchOn: number
   /** ...and only releases above this. The gap is the hysteresis band. */
@@ -50,8 +57,10 @@ export interface Thresholds {
 }
 
 export const DEFAULT_THRESHOLDS: Thresholds = {
-  extended: 0.72,
-  curled: 0.42,
+  // Midway between a realistically curled finger (~0.5) and a comfortably
+  // extended one (~0.9), so both land clearly on their own side with margin.
+  // Retune live from the calibration panel if a hand or camera sits differently.
+  fingerSplit: 0.65,
   // Tuned against a span-normalized distance: with fingers touching this lands
   // near 0.25, and a comfortably open hand sits well above 0.7. The 0.10 gap
   // between on and off is what stops a hand hovering at the boundary from
@@ -59,11 +68,11 @@ export const DEFAULT_THRESHOLDS: Thresholds = {
   pinchOn: 0.38,
   pinchOff: 0.48,
   // Swept against simulated fist-closing motions at 12/15/22Hz, at three
-  // speeds and four thumb-lead ratios: below 0.65 some of those closes commit a
-  // spurious pinch (and so a spurious navigation), and above ~0.72 a relaxed
-  // pinch — fingers only partly extended, which is how many people pinch —
-  // stops registering. 0.68 is the middle of that window.
-  pinchOpen: 0.68,
+  // speeds and four thumb-lead ratios (with the realistic ~0.5 curl): below
+  // 0.75 some closes commit a spurious pinch (a spurious navigation), and above
+  // ~0.78 a relaxed pinch stops registering. 0.75 clears every misfire with a
+  // margin before deliberate pinches are lost.
+  pinchOpen: 0.75,
 }
 
 function dist(a: Landmark, b: Landmark): number {
@@ -124,8 +133,8 @@ export function classify(
   }
 
   const pinchDistance = dist(lms[LM.THUMB_TIP], lms[LM.INDEX_TIP]) / span
-  const ext = (v: number) => v >= thresholds.extended
-  const cur = (v: number) => v <= thresholds.curled
+  const ext = (v: number) => v >= thresholds.fingerSplit
+  const cur = (v: number) => v < thresholds.fingerSplit
 
   return { pose: pick(), curls, pinchDistance, span }
 
@@ -164,19 +173,13 @@ export function classify(
 
     if (fingers.every(ext)) return 'open_palm'
     if (ext(curls.index) && cur(curls.middle) && cur(curls.ring) && cur(curls.pinky)) return 'point'
-    // "Three": thumb, index and middle up, ring and pinky curled — the back
-    // gesture. Disjoint from every pose above: fist/open_palm differ on the
-    // extended set, point has the middle curled, and pinch is ruled out because
-    // its openness gate (mean of middle/ring/pinky) fails with ring and pinky
-    // curled. Requiring the thumb up is what separates it from a peace sign,
-    // matching the deliberate three-finger shape.
-    if (
-      ext(curls.thumb) &&
-      ext(curls.index) &&
-      ext(curls.middle) &&
-      cur(curls.ring) &&
-      cur(curls.pinky)
-    ) {
+    // "Three" / peace: index and middle up, ring and pinky curled — the back
+    // gesture. The thumb is intentionally not required: it's the least reliable
+    // landmark, and whether it's up (three) or tucked (peace) the shape is the
+    // same deliberate one, so both should go back. Disjoint from every pose
+    // above: fist/open_palm differ on the extended set, point has the middle
+    // curled, and pinch is ruled out by its openness gate with ring+pinky curled.
+    if (ext(curls.index) && ext(curls.middle) && cur(curls.ring) && cur(curls.pinky)) {
       return 'three'
     }
     return 'none'
