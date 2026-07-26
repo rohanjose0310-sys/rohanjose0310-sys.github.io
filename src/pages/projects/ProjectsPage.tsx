@@ -3,6 +3,7 @@ import { Canvas, useFrame, useLoader } from '@react-three/fiber'
 import { Bloom, EffectComposer, LUT } from '@react-three/postprocessing'
 import { LUTCubeLoader, type LookupTexture } from 'postprocessing'
 import { PrismScene } from './PrismScene'
+import { AdaptiveSceneDpr } from '../../three/AdaptiveSceneDpr'
 
 import lutTexture from './assets/F-6800-STD.cube?url'
 
@@ -36,6 +37,10 @@ export function ProjectsPage() {
       <div className="scene-layer" style={{ background: 'black' }}>
         <Canvas orthographic gl={{ antialias: false }} camera={{ position: [0, 0, 100], zoom: 60 }}>
           <color attach="background" args={['black']} />
+          {/* Not the full <PerfGuardrails>: this page keeps its own framerate
+              behaviour, but bloom + LUT at full pixel ratio is the least
+              affordable scene here, so it takes the hand-mode dpr backoff. */}
+          <AdaptiveSceneDpr />
           <FitZoom />
           <Suspense fallback={null}>
             <PrismScene />

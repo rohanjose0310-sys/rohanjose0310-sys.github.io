@@ -15,6 +15,7 @@ import { hand, handSettings, useHandSettings, useHandUI } from './store'
 import { DEFAULT_THRESHOLDS } from './classify'
 import { FILTER_OPTIONS } from './config'
 import { useHandTracking } from './useHandTracking'
+import { sceneStats } from '../three/sceneStats'
 import './gestures.css'
 
 const VIEW_WIDTH = 240
@@ -305,6 +306,14 @@ function LiveRows({ split }: { split: number }) {
       <Row label="thumb sp" value={hand.thumbSpread.toFixed(3)} />
       <Row label="span" value={hand.span.toFixed(3)} />
       <Row label="cursor" value={`${hand.x.toFixed(2)}, ${hand.y.toFixed(2)}`} />
+      {/* The 3D scene's own framerate and pixel ratio, so the cost of running
+          the camera — and the effect of the hand-mode dpr backoff — is visible
+          rather than assumed. '(backed off)' means the reduction is active. */}
+      <Row
+        label="scene"
+        value={`${sceneStats.fps} fps · dpr ${sceneStats.dpr.toFixed(2)}${sceneStats.backedOff ? ' ↓' : ''}`}
+        highlight={sceneStats.backedOff}
+      />
       {/* Achieved vs target: when these diverge, inference is overrunning its
           budget and the loop is dropping frames to keep up. */}
       <Row
