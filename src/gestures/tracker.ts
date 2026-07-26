@@ -12,16 +12,16 @@ import {
   MODEL_PATH,
   WASM_PATH,
 } from './config'
+import { DEBUG } from '../lib/debug'
 import { LandmarkFilter } from './oneEuro'
 import { commitProgress, shouldCommit } from './stability'
 import { hand, handSettings, handUI, resetHand, resetHandAll } from './store'
-import { SyntheticSource } from './synthetic'
 import { LM, type HandSource, type Landmark, type Pose, type WorkerResponse } from './types'
 
 export class HandTracker {
   private worker: Worker | null = null
   private camera: CameraSource | null = null
-  private synthetic: SyntheticSource | null = null
+  private synthetic: InstanceType<typeof import('./synthetic').SyntheticSource> | null = null
   private filter = new LandmarkFilter(FILTER_OPTIONS)
   private raf = 0
   private running = false
@@ -55,8 +55,23 @@ export class HandTracker {
 
     try {
       if (source === 'synthetic') {
-        this.synthetic = new SyntheticSource()
-        this.synthetic.start()
+        // Dev-only. The kinematic hand model is a test instrument — it stays in
+        // the tree because it is how every gesture in here was verified, and the
+        // only way to exercise the pipeline where no camera is available (CI, or
+        // any headless browser).
+        //
+        // Rollup still emits it as its own ~3KB chunk even though this branch is
+        // dead in production — a dynamic import is a module-graph edge, created
+        // before dead-code elimination. That chunk is never *requested* by a
+        // visitor, since the else below throws first, so it costs them nothing to
+        // download. Worth knowing rather than assuming it vanished.
+        if (DEBUG) {
+          const { SyntheticSource } = await import('./synthetic')
+          this.synthetic = new SyntheticSource()
+          this.synthetic.start()
+        } else {
+          throw new Error('the synthetic hand source is dev-only')
+        }
       } else {
         this.camera = new CameraSource()
         // Concurrently, not in sequence: the worker's ~10.8MB of wasm and model
@@ -92,7 +107,7 @@ export class HandTracker {
         if (msg.type === 'ready') return resolve()
         if (msg.type === 'error') {
           // An error after startup shouldn't reject an already-settled promise;
-          // surface it on the overlay instead so it isn't swallowed.
+          // put it on handUI.message instead so it isn't swallowed.
           handUI.status = 'error'
           handUI.message = msg.message
           return reject(new Error(msg.message))
@@ -147,7 +162,7 @@ export class HandTracker {
     const dt = this.lastIngest ? (now - this.lastIngest) / 1000 : 0
     this.lastIngest = now
 
-    // Rolling one-second FPS, for the overlay's perf readout.
+    // Rolling one-second inference rate, for dev diagnostics.
     this.frameTimes.push(now)
     while (this.frameTimes.length && now - this.frameTimes[0] > 1000) this.frameTimes.shift()
     hand.fps = this.frameTimes.length
@@ -243,11 +258,5 @@ export class HandTracker {
     }
     this.busy = false
     this.filter.reset()
-  }
-
-  retune(options: Partial<Thresholds & { minCutoff: number; beta: number }>) {
-    const { minCutoff, beta, ...thresholds } = options
-    Object.assign(this.thresholds, thresholds)
-    if (minCutoff !== undefined || beta !== undefined) this.filter.retune({ minCutoff, beta })
   }
 }

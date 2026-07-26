@@ -121,13 +121,4 @@ export class LandmarkFilter {
   reset() {
     for (const f of this.filters) f.reset()
   }
-
-  retune(options: OneEuroOptions) {
-    this.options = { ...this.options, ...options }
-    for (const f of this.filters) {
-      if (options.minCutoff !== undefined) f.minCutoff = options.minCutoff
-      if (options.beta !== undefined) f.beta = options.beta
-      if (options.dCutoff !== undefined) f.dCutoff = options.dCutoff
-    }
-  }
 }

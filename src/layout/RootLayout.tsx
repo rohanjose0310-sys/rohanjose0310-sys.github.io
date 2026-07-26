@@ -6,7 +6,7 @@ import { useLenis } from '../lib/lenis'
 import { Logo } from '../components/ui/Logo'
 import { BarTint } from '../components/ui/BarTint'
 import { applyPageTheme } from '../lib/pageTheme'
-import { HANDS_DEBUG, HANDS_SUPPORTED } from '../gestures/flag'
+import { HANDS_SUPPORTED } from '../gestures/flag'
 
 // Both lazy, so the gesture UI and its CSS stay out of the main bundle. The
 // heavy parts (MediaPipe wasm + the 7.8MB model) are further down still — they
@@ -16,9 +16,6 @@ const HandControl = lazy(() =>
 )
 const NavGestures = lazy(() =>
   import('../gestures/NavGestures').then((m) => ({ default: m.NavGestures })),
-)
-const HandOverlay = lazy(() =>
-  import('../gestures/HandOverlay').then((m) => ({ default: m.HandOverlay })),
 )
 
 // Persistent app chrome: one Lenis smooth-scroll instance for the whole app;
@@ -47,8 +44,6 @@ export function RootLayout() {
           <HandControl />
           {/* Back/scroll gestures on every page except home (self-gating). */}
           <NavGestures />
-          {/* Developer calibration panel, on top, dev/?hands only. */}
-          {HANDS_DEBUG && <HandOverlay />}
         </Suspense>
       )}
     </>

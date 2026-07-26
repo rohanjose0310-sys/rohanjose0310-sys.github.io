@@ -53,7 +53,7 @@ export const hand = {
   /** Wrist->middle-MCP span. Larger = hand closer to the camera. */
   span: 0,
   curls: { thumb: 0, index: 0, middle: 0, ring: 0, pinky: 0 } as FingerCurls,
-  /** Perf readout for the overlay. */
+  /** Diagnostics, reachable as `window.hand` in dev. */
   inferenceMs: 0,
   fps: 0,
 }
@@ -76,13 +76,11 @@ export const handUI = proxy({
 export const useHandUI = () => useProxy(handUI)
 
 /**
- * Restart-scoped settings, surfaced in the calibration panel. Separate from
- * `handUI` because changing any of these has to tear the tracker down and build
- * a new landmarker — they cannot be applied to a running session.
+ * Landmarker settings, read when the tracker starts. Left as a proxy rather than
+ * folded into constants because they can only take effect on a restart, so any
+ * future control over them has to rebuild the tracker anyway.
  */
 export const handSettings = proxy<RuntimeSettings>({ ...DEFAULT_RUNTIME_SETTINGS })
-
-export const useHandSettings = () => useProxy(handSettings)
 
 // Expose the live state for console poking and for driving the pipeline from
 // automated checks. Dev only — this is a debugging affordance, not an API.
@@ -108,10 +106,9 @@ export function resetHand() {
 }
 
 /**
- * Full reset, including the perf readout. Used when tracking stops or fails —
- * otherwise the panel keeps showing the last skeleton and a live-looking frame
- * rate next to an error message, which reads as though something is still
- * working when nothing is.
+ * Full reset, including the diagnostics. Used when tracking stops or fails, so
+ * nothing downstream can keep reading a live-looking frame rate or a stale
+ * skeleton from a session that has already ended.
  */
 export function resetHandAll() {
   resetHand()
