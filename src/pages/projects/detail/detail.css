@@ -1,0 +1,59 @@
+/* Project detail page. The gallery itself (GalleryScene, port of the pmndrs
+   image-gallery demo) carries all of the project's writing in-scene, on the
+   text column beside each frame. The only DOM over the canvas is this small
+   corner block: a way back, and enough to say which project you are in.
+
+   It must never intercept a click — the whole point of dropping the earlier
+   copy panel was that frames behind DOM could not be selected — so the block
+   is pointer-events: none and only the link takes them back. */
+
+.detail-head {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 2.5rem 3rem;
+  pointer-events: none;
+  z-index: 10;
+  animation: fade-in 0.4s ease both;
+}
+
+.detail-back {
+  display: inline-block;
+  margin-bottom: 1.25rem;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  transition: color 0.2s ease;
+  pointer-events: auto;
+}
+
+.detail-back:hover {
+  color: var(--text-h);
+}
+
+.detail-head h1 {
+  font-size: 1.5rem;
+  line-height: 1.15;
+  margin: 0 0 0.35rem;
+}
+
+.detail-meta {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0;
+}
+
+/* Phones: the frames sit near the middle of a much narrower canvas, so pull
+   the block in tight to keep it out of their way. */
+@media (pointer: coarse), (max-width: 800px) {
+  .detail-head {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .detail-head h1 {
+    font-size: 1.15rem;
+  }
+}

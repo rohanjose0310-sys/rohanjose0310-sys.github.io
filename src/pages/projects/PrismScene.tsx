@@ -10,7 +10,8 @@ import { ProjectBox } from './prism/ProjectBox'
 import type { RayEvent, ReflectApi } from './prism/Reflect'
 import { calculateRefractionAngle, lerp, lerpV3 } from './prism/util'
 import { BackArrow } from './BackArrow'
-import { PROJECTS } from './projectData'
+import { getProject } from './projectData'
+import { resolveFocus } from './focus'
 import { IS_TOUCH } from '../../lib/touch'
 
 import interFont from './assets/Inter_Bold.json?url'
@@ -65,6 +66,8 @@ export function PrismScene() {
 
   useFrame((state) => {
     if (!boxreflect.current || !rainbow.current || !spot.current || !ambient.current) return
+    // Which project's card (if any) is focused this frame — see focus.ts.
+    resolveFocus()
     // Tie the beam to the mouse
     boxreflect.current.setRay(
       [(state.pointer.x * state.viewport.width) / 2, (state.pointer.y * state.viewport.height) / 2, 0],
@@ -104,9 +107,14 @@ export function PrismScene() {
       {/* Prism + project boxes + reflect beam */}
       <Beam ref={boxreflect} bounce={10} far={20}>
         <Prism position={[0, -0.5, 0]} onRayOver={rayOver} onRayOut={rayOut} onRayMove={rayMove} />
-        <ProjectBox project={PROJECTS[0]} position={[-2.5, -2.5, 0]} rotation={[0, 0, Math.PI / 4]} cardOffset={[-130, 8]} />
-        <ProjectBox project={PROJECTS[1]} position={[2.25, -3.5, 0]} rotation={[0, 0, Math.PI / 3.5]} cardOffset={[140, 8]} />
-        <ProjectBox position={[-3, 1, 0]} rotation={[0, 0, Math.PI / 4]} />
+        <ProjectBox project={getProject('exiled')} position={[-2.5, -2.5, 0]} rotation={[0, 0, Math.PI / 4]} cardOffset={[-130, 8]} />
+        <ProjectBox project={getProject('dream-parasite')} position={[2.25, -3.5, 0]} rotation={[0, 0, Math.PI / 3.5]} cardOffset={[140, 8]} />
+        {/* Top-left diamond, formerly decorative. The diamond itself already
+            sits at the screen's left edge, so unlike the other two boxes the
+            card is pushed back toward centre (positive x), not further out —
+            further left would run it off-screen. Lifted well above the
+            diamond so it clears the "My Projects" caption over the prism. */}
+        <ProjectBox project={getProject('solasphere')} position={[-3, 1, 0]} rotation={[0, 0, Math.PI / 4]} cardOffset={[70, 90]} />
       </Beam>
       {/* Rainbow and flares */}
       <Rainbow ref={rainbow} startRadius={0} endRadius={0.5} fade={0} />

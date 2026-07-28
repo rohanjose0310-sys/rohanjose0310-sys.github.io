@@ -18,7 +18,9 @@ const LOGO_ASPECT = 225.5 / 74
 
 function useLogoSrc() {
   const { pathname } = useLocation()
-  return DARK_BACKDROP_ROUTES.includes(pathname) ? '/logo-white.png' : '/logo-black.png'
+  // startsWith, not includes: /projects/:id (the dark gallery detail page)
+  // needs the white mark too, not just the exact /projects grid route.
+  return DARK_BACKDROP_ROUTES.some((route) => pathname.startsWith(route)) ? '/logo-white.png' : '/logo-black.png'
 }
 
 // Bare brand mark, sized by the caller. Meant to sit directly beside a "Rohan

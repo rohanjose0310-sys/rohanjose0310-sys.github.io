@@ -34,7 +34,23 @@
           '/resume': { bg: '#000000', scheme: 'dark' },
         }
         window.__pageTint = function (path) {
-          var p = PAGES[path.replace(/\/+$/, '') || '/'] || PAGES['/']
+          var clean = path.replace(/\/+$/, '') || '/'
+          // Exact match first; otherwise the longest PAGES key that `clean` is
+          // nested under (e.g. '/projects/dream-parasite' -> '/projects'),
+          // so a deep link to an unlisted child route inherits its section's
+          // tint instead of silently falling through to '/'s light theme.
+          var keys = Object.keys(PAGES).sort(function (a, b) {
+            return b.length - a.length
+          })
+          var matchKey = '/'
+          for (var i = 0; i < keys.length; i++) {
+            var key = keys[i]
+            if (clean === key || clean.indexOf(key + '/') === 0) {
+              matchKey = key
+              break
+            }
+          }
+          var p = PAGES[matchKey] || PAGES['/']
           return { bg: p.bg, top: p.top || p.bg, bottom: p.bottom || p.bg, scheme: p.scheme }
         }
         window.__pageTheme = function (path) {

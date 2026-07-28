@@ -30,6 +30,15 @@ export function NavGestures() {
   // Home drives its own gestures (the carousel); back has no meaning there.
   const active = ui.status === 'running' && pathname !== '/'
   const wasPeace = useRef(false)
+  // The effect below only restarts when `active` flips, not on every route
+  // change (e.g. /projects -> /projects/:id stays active the whole time), so
+  // its tick loop can't just close over `pathname` — that would go stale.
+  // A ref keeps it live without tearing down the gesture engine on every nav;
+  // written from an effect (not during render) per the rules of hooks.
+  const pathnameRef = useRef(pathname)
+  useEffect(() => {
+    pathnameRef.current = pathname
+  })
 
   useEffect(() => {
     if (!active) return
@@ -52,7 +61,11 @@ export function NavGestures() {
       // pose fires exactly one navigation. Navigating unmounts this effect, so
       // there's no second fire from the same hold.
       const peace = hand.pose === 'peace'
-      if (peace && !wasPeace.current) navigate('/')
+      if (peace && !wasPeace.current) {
+        // From a project detail page, "back" is one level up (the gallery
+        // grid), not all the way home — same as tapping the in-scene arrow.
+        navigate(pathnameRef.current.startsWith('/projects/') ? '/projects' : '/')
+      }
       wasPeace.current = peace
     }
     raf = requestAnimationFrame(tick)

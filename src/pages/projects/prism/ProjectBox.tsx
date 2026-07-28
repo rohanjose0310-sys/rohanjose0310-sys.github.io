@@ -2,7 +2,10 @@ import * as THREE from 'three'
 import { useRef, useState } from 'react'
 import { useFrame, type ThreeElements } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
+import { useNavigate } from 'react-router-dom'
 import { lerpC, rayProps } from './util'
+import { claimBeam, claimHover, releaseBeam, useFocus } from '../focus'
+import { IS_TOUCH } from '../../../lib/touch'
 import type { Project } from '../projectData'
 
 // The demo's rounded Box, extended: it lights up when the beam reflects onto
@@ -40,7 +43,12 @@ export function ProjectBox({ project, cardOffset = [0, 48], ...props }: ProjectB
   const [rayHit, setRayHit] = useState(false)
   const [hovered, setHovered] = useState(false)
   const inner = useRef<THREE.Mesh>(null)
+  const navigate = useNavigate()
+  const focusSnap = useFocus()
+  // Per-diamond glow stays local and unarbitrated — every beam-lit diamond
+  // still lights up even when another one wins the card (see focus.ts).
   const active = rayHit || hovered
+  const showCard = Boolean(project) && focusSnap.id === project?.id
 
   useFrame(() => {
     if (!inner.current) return
@@ -48,24 +56,64 @@ export function ProjectBox({ project, cardOffset = [0, 48], ...props }: ProjectB
     lerpC(material.emissive, active ? 'white' : '#454545', 0.1)
   })
 
+  const goToProject = (e: { stopPropagation: () => void }) => {
+    if (!project) return
+    e.stopPropagation()
+    navigate(`/projects/${project.id}`)
+  }
+
   return (
     <group scale={0.5} {...props}>
       <mesh
         visible={false}
         geometry={boxGeometry}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
+        onPointerOver={() => {
+          setHovered(true)
+          if (project) claimHover(project.id)
+        }}
+        onPointerOut={() => {
+          setHovered(false)
+          if (project) claimHover(null)
+        }}
         // Touch has no hover: tapping the box shows the card, tapping
         // anywhere else hides it.
-        onPointerDown={() => setHovered(true)}
-        onPointerMissed={() => setHovered(false)}
-        {...rayProps({ onRayOver: () => setRayHit(true), onRayOut: () => setRayHit(false) })}
+        onPointerDown={() => {
+          setHovered(true)
+          if (project) claimHover(project.id)
+        }}
+        onPointerMissed={() => {
+          setHovered(false)
+          if (project) claimHover(null)
+        }}
+        // The diamond itself is a large secondary target, mirroring the
+        // in-scene navigation precedent in BackArrow.tsx. Desktop only: a tap
+        // fires pointerdown *and* click, so on touch this would navigate on the
+        // very tap meant to open the card — the visitor would never see the
+        // preview, which is the only thing standing in for the hover they don't
+        // have. There, the card's own button is the way in.
+        onClick={IS_TOUCH ? undefined : goToProject}
+        {...rayProps({
+          onRayOver: () => setRayHit(true),
+          onRayOut: () => {
+            setRayHit(false)
+            if (project) releaseBeam(project.id)
+          },
+          // `e.intersects` is the whole bounce chain in order (see Reflect.tsx
+          // and focus.ts) — this diamond's index in it is exactly how many
+          // bounces the beam took to reach it, i.e. how directly the cursor
+          // is aiming here. The arbiter picks the lowest one.
+          onRayMove: (e) => project && claimBeam(project.id, e.intersects.indexOf(e.intersect)),
+        })}
       />
       <mesh ref={inner} geometry={roundedBoxGeometry}>
         <meshStandardMaterial color="#333" toneMapped={false} emissiveIntensity={2} />
       </mesh>
-      {project && active && (
-        <Html center zIndexRange={[100, 0]} style={{ pointerEvents: 'none' }}>
+      {project && showCard && (
+        // Desktop: the card is a readout only and must never take a pointer —
+        // it sits where the beam is pointing, and swallowing a click there
+        // would stop the click that opens the project. Touch has no beam, so
+        // there the card is the tap target.
+        <Html center zIndexRange={[100, 0]} style={{ pointerEvents: IS_TOUCH ? 'auto' : 'none' }}>
           <div
             style={{
               // Anchored at the box center: lift by its own half-height, then
@@ -105,6 +153,54 @@ export function ProjectBox({ project, cardOffset = [0, 48], ...props }: ProjectB
             >
               {project.title}
             </span>
+            <span
+              style={{
+                fontSize: '0.65rem',
+                lineHeight: 1.4,
+                color: 'var(--text)',
+                textAlign: 'center',
+              }}
+            >
+              {project.tagline}
+            </span>
+            {IS_TOUCH ? (
+              <button
+                type="button"
+                // The card is a drei <Html> portal, mounted onto the DOM tree
+                // outside the R3F canvas — a plain onClick risks firing after
+                // (or racing) R3F's onPointerMissed on the invisible hitbox
+                // below, which would clear the card before navigation runs.
+                // onPointerDown + stopPropagation fires first and settles it.
+                onPointerDown={goToProject}
+                style={{
+                  appearance: 'none',
+                  border: 'none',
+                  borderRadius: '0.35rem',
+                  padding: '0.35rem 0.5rem',
+                  fontSize: '0.68rem',
+                  letterSpacing: '0.03em',
+                  color: '#0b0b0f',
+                  background: 'var(--accent)',
+                  cursor: 'pointer',
+                }}
+              >
+                View project →
+              </button>
+            ) : (
+              // Not a button — nothing here is clickable. The beam is already
+              // on this diamond, so the click can land anywhere.
+              <span
+                style={{
+                  fontSize: '0.6rem',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: 'var(--accent)',
+                  textAlign: 'center',
+                }}
+              >
+                Click to open
+              </span>
+            )}
           </div>
         </Html>
       )}
