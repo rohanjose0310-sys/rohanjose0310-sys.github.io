@@ -45,20 +45,22 @@ const GALLERY_LAYOUT: Array<Pick<GalleryImage, 'position' | 'rotation'>> = [
 // Swapping to public/projects/<id>/*.jpg later is a one-array edit here.
 const PLACEHOLDER_URLS = Array.from({ length: 9 }, (_, i) => `/img${i + 1}_.jpg`)
 
-// Solasphere has 6 real installation photos, not 9 — cycle them across the
-// shared 9-slot GALLERY_LAYOUT (index % 6) rather than trimming the layout,
-// so every project keeps the same frame arrangement. Index 5 (the "left3"
-// slot, GALLERY_LAYOUT's closest and most prominent left-side frame — the
-// first one a viewer's eye lands on) is the behind-the-scenes build photo
-// swapped for a sixth installation close-up instead, keeping the gallery on
-// the finished piece rather than the people who made it.
+// Solasphere has 8 real installation photos for the shared 9-slot
+// GALLERY_LAYOUT, so this lists one url per slot explicitly rather than
+// cycling a shorter array — with only 8 for 9 frames, exactly one photo has
+// to repeat, and this makes it obvious which one and why, instead of leaving
+// it to fall out of a modulo. The repeat is the front frame reappearing at
+// "right3": every other real photo appears exactly once.
 const SOLASPHERE_URLS = [
-  '/solasphere2.jpg',
-  '/solasphere3.jpg',
-  '/solasphere4.jpg',
-  '/solasphere6.jpg',
-  '/solasphere7.jpg',
-  '/solasphere5.jpg',
+  '/solasphere2.jpg', // front
+  '/solasphere3.jpg', // back-left
+  '/solasphere4.jpg', // back-right
+  '/solasphere6.jpg', // left1
+  '/solasphere7.jpg', // left2
+  '/solasphere5.jpg', // left3 — closest/most prominent on the left
+  '/solasphere9.jpg', // right1
+  '/solasphere10.jpg', // right2
+  '/solasphere2.jpg', // right3 — the one unavoidable repeat (8 photos, 9 slots)
 ]
 
 function gallery(captions: string[], urls: string[] = PLACEHOLDER_URLS): GalleryImage[] {
