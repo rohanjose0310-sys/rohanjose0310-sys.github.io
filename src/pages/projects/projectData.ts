@@ -47,14 +47,18 @@ const PLACEHOLDER_URLS = Array.from({ length: 9 }, (_, i) => `/img${i + 1}_.jpg`
 
 // Solasphere has 6 real installation photos, not 9 — cycle them across the
 // shared 9-slot GALLERY_LAYOUT (index % 6) rather than trimming the layout,
-// so every project keeps the same frame arrangement.
+// so every project keeps the same frame arrangement. Index 5 (the "left3"
+// slot, GALLERY_LAYOUT's closest and most prominent left-side frame — the
+// first one a viewer's eye lands on) is the behind-the-scenes build photo
+// swapped for a sixth installation close-up instead, keeping the gallery on
+// the finished piece rather than the people who made it.
 const SOLASPHERE_URLS = [
   '/solasphere2.jpg',
   '/solasphere3.jpg',
   '/solasphere4.jpg',
   '/solasphere6.jpg',
   '/solasphere7.jpg',
-  '/solasphere8.jpg',
+  '/solasphere5.jpg',
 ]
 
 function gallery(captions: string[], urls: string[] = PLACEHOLDER_URLS): GalleryImage[] {

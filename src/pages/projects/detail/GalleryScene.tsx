@@ -131,9 +131,14 @@ function Frame({
   useCursor(hovered)
   useFrame((state, dt) => {
     image.current.material.zoom = 2 + Math.sin(rnd * 10000 + state.clock.elapsedTime / 3) / 2
+    // Same relative inset/hover-shrink the demo used (0.85 width, 0.9 height,
+    // shrinking further on hover) — just baselined against Image's own
+    // [1, GOLDENRATIO] scale below instead of an implicit [1, 1], since that
+    // scale moved from the parent mesh onto Image itself. See the comment by
+    // the <Image> tag for why.
     easing.damp3(
       image.current.scale,
-      [0.85 * (!active && hovered ? 0.85 : 1), 0.9 * (!active && hovered ? 0.905 : 1), 1],
+      [0.85 * (!active && hovered ? 0.85 : 1), GOLDENRATIO * 0.9 * (!active && hovered ? 0.905 : 1), 1],
       0.1,
       dt,
     )
@@ -157,8 +162,25 @@ function Frame({
           <boxGeometry />
           <meshBasicMaterial toneMapped={false} fog={false} />
         </mesh>
-        <Image raycast={() => null} ref={image} position={[0, 0, 0.7]} url={url} />
       </mesh>
+      {/* Deliberately NOT nested inside the box above (unlike the demo).
+          drei's <Image> cover-crops assuming ITS OWN `scale` prop is the
+          on-screen aspect it fills; left at the default (square) while
+          nested inside the box's non-uniform [1, GOLDENRATIO, 0.05] scale,
+          the shader crops to a square and the parent transform then
+          stretches that square 1.618x taller — invisible on the demo's
+          landscape stock photos, glaring on our portrait installation shots.
+          scale={[1, GOLDENRATIO]} here tells the shader the real target
+          aspect, and this position replicates exactly where nesting used to
+          place it (the box's own position, offset 0.035 forward — 0.7 in the
+          box's old local z, scaled by the box's 0.05 z-scale). */}
+      <Image
+        raycast={() => null}
+        ref={image}
+        position={[0, GOLDENRATIO / 2, 0.035]}
+        url={url}
+        scale={[1, GOLDENRATIO]}
+      />
       {/* The demo's label slot, same anchor, position and fontSize — only
           `maxWidth` is opened up from 0.1, which at this size wraps a sentence
           to roughly four characters a line. */}
