@@ -17,6 +17,9 @@ import type { GalleryImage } from '../projectData'
 //     per-frame mesh `name` without adding a dependency. (The demo rendered
 //     that uuid as the frame's label; here the label is the real caption.)
 //  3. `<Text>` gets an explicit `font`, or troika fetches Roboto from a CDN.
+//  4. The demo's hover-frame tint is CSS 'orange' (#ffa500) — swapped for this
+//     site's actual accent color (index.css's --accent, #ff6a00) so the
+//     gallery's hover state reads as the same orange used everywhere else.
 //
 // The demo's text column beside each frame carries the actual writing — see
 // GalleryImage.caption. A DOM panel was tried instead and removed: at a size
@@ -96,9 +99,14 @@ function Frames({
       }}
       onPointerMissed={() => setSelected(null)}
     >
-      {images.map((img) => {
-        const name = slug(img.url)
-        return <Frame key={img.url} {...img} name={name} active={selected === name} />
+      {images.map((img, i) => {
+        // Solasphere reuses its 6 real photos across 9 frame slots (see
+        // projectData.ts), so the url alone is no longer a unique per-frame
+        // id — two frames sharing a name would make getObjectByName above
+        // always resolve to the first one and both frames highlight together.
+        // The slot index makes every frame distinct regardless of image reuse.
+        const name = `${slug(img.url)}-${i}`
+        return <Frame key={name} {...img} name={name} active={selected === name} />
       })}
     </group>
   )
@@ -129,7 +137,7 @@ function Frame({
       0.1,
       dt,
     )
-    easing.dampC((frame.current.material as THREE.MeshBasicMaterial).color, hovered ? 'orange' : 'white', 0.1, dt)
+    easing.dampC((frame.current.material as THREE.MeshBasicMaterial).color, hovered ? '#ff6a00' : 'white', 0.1, dt)
   })
   return (
     <group position={position} rotation={rotation}>

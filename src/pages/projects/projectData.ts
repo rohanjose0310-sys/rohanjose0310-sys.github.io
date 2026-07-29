@@ -45,10 +45,22 @@ const GALLERY_LAYOUT: Array<Pick<GalleryImage, 'position' | 'rotation'>> = [
 // Swapping to public/projects/<id>/*.jpg later is a one-array edit here.
 const PLACEHOLDER_URLS = Array.from({ length: 9 }, (_, i) => `/img${i + 1}_.jpg`)
 
-function gallery(captions: string[]): GalleryImage[] {
+// Solasphere has 6 real installation photos, not 9 — cycle them across the
+// shared 9-slot GALLERY_LAYOUT (index % 6) rather than trimming the layout,
+// so every project keeps the same frame arrangement.
+const SOLASPHERE_URLS = [
+  '/solasphere2.jpg',
+  '/solasphere3.jpg',
+  '/solasphere4.jpg',
+  '/solasphere6.jpg',
+  '/solasphere7.jpg',
+  '/solasphere8.jpg',
+]
+
+function gallery(captions: string[], urls: string[] = PLACEHOLDER_URLS): GalleryImage[] {
   return GALLERY_LAYOUT.map((layout, i) => ({
     ...layout,
-    url: PLACEHOLDER_URLS[i],
+    url: urls[i % urls.length],
     caption: captions[i],
   }))
 }
@@ -72,7 +84,7 @@ export const PROJECTS: Project[] = [
       'She built the branches herself, which is its own kind of mourning — making the loss physical so it can be entered.',
       'From outside it reads as a forest. From inside it reads as a floor plan that gave up pretending.',
       'The room is smaller than the grief and larger than the house. That is the whole of the installation.',
-    ]),
+    ], SOLASPHERE_URLS),
   },
   {
     id: 'exiled',
