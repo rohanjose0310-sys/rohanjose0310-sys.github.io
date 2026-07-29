@@ -45,12 +45,12 @@ const GALLERY_LAYOUT: Array<Pick<GalleryImage, 'position' | 'rotation'>> = [
 // Swapping to public/projects/<id>/*.jpg later is a one-array edit here.
 const PLACEHOLDER_URLS = Array.from({ length: 9 }, (_, i) => `/img${i + 1}_.jpg`)
 
-// Solasphere has 8 real installation photos for the shared 9-slot
-// GALLERY_LAYOUT, so this lists one url per slot explicitly rather than
-// cycling a shorter array — with only 8 for 9 frames, exactly one photo has
-// to repeat, and this makes it obvious which one and why, instead of leaving
-// it to fall out of a modulo. The repeat is the front frame reappearing at
-// "right3": every other real photo appears exactly once.
+// Solasphere: one real photo per GALLERY_LAYOUT slot, listed explicitly
+// (rather than cycling a shorter array) so it's obvious which slot gets which
+// photo. solasphere10.png (the build-day group photo, formerly at "right2")
+// is a 224x299 source — too low-res to display sharp at any size, not a
+// compression artifact — swapped for the hero shot used as the project's
+// hover-card thumbnail instead, which is a real high-resolution photo.
 const SOLASPHERE_URLS = [
   '/solasphere2.jpg', // front
   '/solasphere3.jpg', // back-left
@@ -59,8 +59,8 @@ const SOLASPHERE_URLS = [
   '/solasphere7.jpg', // left2
   '/solasphere5.jpg', // left3 — closest/most prominent on the left
   '/solasphere9.jpg', // right1
-  '/solasphere10.jpg', // right2
-  '/solasphere2.jpg', // right3 — the one unavoidable repeat (8 photos, 9 slots)
+  '/solasphere.jpg', // right2 — swapped from the too-low-res group photo
+  '/solasphere11.jpg', // right3 — was a repeat of the front photo
 ]
 
 function gallery(captions: string[], urls: string[] = PLACEHOLDER_URLS): GalleryImage[] {
