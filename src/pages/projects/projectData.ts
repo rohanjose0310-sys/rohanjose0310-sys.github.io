@@ -48,7 +48,7 @@ const PLACEHOLDER_URLS = Array.from({ length: 9 }, (_, i) => `/img${i + 1}_.jpg`
 // Solasphere: one real photo per GALLERY_LAYOUT slot, listed explicitly
 // (rather than cycling a shorter array) so it's obvious which slot gets which
 // photo. solasphere10.png (the build-day group photo, formerly at "right2")
-// is a 224x299 source — too low-res to display sharp at any size, not a
+// was a 224x299 source — too low-res to display sharp at any size, not a
 // compression artifact — swapped for the hero shot used as the project's
 // hover-card thumbnail instead, which is a real high-resolution photo.
 const SOLASPHERE_URLS = [
@@ -60,7 +60,7 @@ const SOLASPHERE_URLS = [
   '/solasphere5.jpg', // left3 — closest/most prominent on the left
   '/solasphere9.jpg', // right1
   '/solasphere.jpg', // right2 — swapped from the too-low-res group photo
-  '/solasphere11.jpg', // right3 — was a repeat of the front photo
+  '/solasphere12.jpg', // right3 — full installation shot (IMG_3681)
 ]
 
 function gallery(captions: string[], urls: string[] = PLACEHOLDER_URLS): GalleryImage[] {
