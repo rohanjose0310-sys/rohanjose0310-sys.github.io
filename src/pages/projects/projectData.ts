@@ -63,6 +63,16 @@ const SOLASPHERE_URLS = [
   '/solasphere12.jpg', // right3 — full installation shot (IMG_3681)
 ]
 
+// Dream Parasite: only 5 real photos exist, so they cycle across the 9
+// GALLERY_LAYOUT slots (i % urls.length in gallery()).
+const NOVA_URLS = [
+  '/Nova1.jpeg',
+  '/Nova2.png',
+  '/Nova3.png',
+  '/Nova4.png',
+  '/Nova5.jpeg',
+]
+
 function gallery(captions: string[], urls: string[] = PLACEHOLDER_URLS): GalleryImage[] {
   return GALLERY_LAYOUT.map((layout, i) => ({
     ...layout,
@@ -130,7 +140,7 @@ export const PROJECTS: Project[] = [
       'What it leaves behind is warmth in an empty chair. Residue is the only proof available.',
       'One dream fought back and briefly won. The furniture still shows where it happened.',
       'Still feeding, still unnamed. It has outlasted every host who tried to describe it.',
-    ]),
+    ], NOVA_URLS),
   },
 ]
 
