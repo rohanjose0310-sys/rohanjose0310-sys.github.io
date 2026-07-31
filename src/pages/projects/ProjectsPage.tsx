@@ -5,7 +5,9 @@ import { LUTCubeLoader, type LookupTexture } from 'postprocessing'
 import { useNavigate } from 'react-router-dom'
 import { PrismScene } from './PrismScene'
 import { focus } from './focus'
+import { HandAim } from './HandAim'
 import { AdaptiveSceneDpr } from '../../three/AdaptiveSceneDpr'
+import { HANDS_SUPPORTED } from '../../gestures/flag'
 import { IS_TOUCH } from '../../lib/touch'
 
 import lutTexture from './assets/F-6800-STD.cube?url'
@@ -72,6 +74,9 @@ export function ProjectsPage() {
           </Suspense>
         </Canvas>
       </div>
+      {/* Outside the Canvas: it owns an rAF loop and a DOM chip, neither of
+          which belongs in the scene graph. No-ops until tracking is running. */}
+      {HANDS_SUPPORTED && <HandAim />}
     </>
   )
 }

@@ -1,10 +1,12 @@
 import * as THREE from 'three'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useFrame, type ThreeElements } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import { useNavigate } from 'react-router-dom'
 import { lerpC, rayProps } from './util'
+import { registerHitbox } from './hitboxes'
 import { claimBeam, claimHover, releaseBeam, useFocus } from '../focus'
+import { aim } from '../aim'
 import { IS_TOUCH } from '../../../lib/touch'
 import type { Project } from '../projectData'
 
@@ -43,12 +45,20 @@ export function ProjectBox({ project, cardOffset = [0, 48], ...props }: ProjectB
   const [rayHit, setRayHit] = useState(false)
   const [hovered, setHovered] = useState(false)
   const inner = useRef<THREE.Mesh>(null)
+  const hitbox = useRef<THREE.Mesh>(null)
   const navigate = useNavigate()
   const focusSnap = useFocus()
   // Per-diamond glow stays local and unarbitrated — every beam-lit diamond
   // still lights up even when another one wins the card (see focus.ts).
   const active = rayHit || hovered
   const showCard = Boolean(project) && focusSnap.id === project?.id
+
+  // The hand cursor raycasts this same hitbox to answer "is the cursor on this
+  // diamond", which the beam can't do — see hitboxes.ts.
+  useEffect(() => {
+    if (!project || !hitbox.current) return
+    return registerHitbox(project.id, hitbox.current)
+  }, [project])
 
   useFrame(() => {
     if (!inner.current) return
@@ -65,6 +75,7 @@ export function ProjectBox({ project, cardOffset = [0, 48], ...props }: ProjectB
   return (
     <group scale={0.5} {...props}>
       <mesh
+        ref={hitbox}
         visible={false}
         geometry={boxGeometry}
         onPointerOver={() => {
@@ -188,7 +199,10 @@ export function ProjectBox({ project, cardOffset = [0, 48], ...props }: ProjectB
               </button>
             ) : (
               // Not a button — nothing here is clickable. The beam is already
-              // on this diamond, so the click can land anywhere.
+              // on this diamond, so the click can land anywhere. In hand mode
+              // there is no click at all, so it names the gesture instead:
+              // this line is the card's only call to action, and telling a
+              // visitor with no cursor to click is worse than saying nothing.
               <span
                 style={{
                   fontSize: '0.6rem',
@@ -198,7 +212,7 @@ export function ProjectBox({ project, cardOffset = [0, 48], ...props }: ProjectB
                   textAlign: 'center',
                 }}
               >
-                Click to open
+                {aim.source === 'hand' ? 'Pinch to open' : 'Click to open'}
               </span>
             )}
           </div>

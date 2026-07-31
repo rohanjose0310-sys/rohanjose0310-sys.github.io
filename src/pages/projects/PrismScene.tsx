@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Center, Text3D } from '@react-three/drei'
 import { Beam } from './prism/Beam'
@@ -7,11 +7,13 @@ import { Rainbow, type RainbowMaterialImpl } from './prism/Rainbow'
 import { Prism } from './prism/Prism'
 import { Flare } from './prism/Flare'
 import { ProjectBox } from './prism/ProjectBox'
+import { HandCursor } from './prism/HandCursor'
+import { aimNdc } from './aim'
 import type { RayEvent, ReflectApi } from './prism/Reflect'
-import { calculateRefractionAngle, lerp, lerpV3 } from './prism/util'
+import { calculateRefractionAngle, lerp, lerpV3, ndcToWorld } from './prism/util'
 import { BackArrow } from './BackArrow'
 import { getProject } from './projectData'
-import { resolveFocus } from './focus'
+import { resetClaims, resolveFocus } from './focus'
 import { IS_TOUCH } from '../../lib/touch'
 
 import interFont from './assets/Inter_Bold.json?url'
@@ -27,6 +29,13 @@ export function PrismScene() {
   const boxreflect = useRef<ReflectApi>(null)
   const rainbow = useRef<THREE.Mesh>(null)
   const [vec] = useState(() => new THREE.Vector3())
+  // Separate from `vec`, which rayMove writes into api.positions — aliasing the
+  // two would feed the beam's own origin back into its bounce buffer.
+  const [origin] = useState(() => new THREE.Vector3())
+
+  // Claims outlive this component (see focus.ts) — drop them on the way out so
+  // returning to the page doesn't restore a card nobody is aiming at.
+  useEffect(() => resetClaims, [])
 
   const rayOut = useCallback(() => hitPrism(false), [])
   const rayOver = useCallback((e: RayEvent) => {
@@ -68,11 +77,12 @@ export function PrismScene() {
     if (!boxreflect.current || !rainbow.current || !spot.current || !ambient.current) return
     // Which project's card (if any) is focused this frame — see focus.ts.
     resolveFocus()
-    // Tie the beam to the mouse
-    boxreflect.current.setRay(
-      [(state.pointer.x * state.viewport.width) / 2, (state.pointer.y * state.viewport.height) / 2, 0],
-      [0, 0, 0],
-    )
+    // Tie the beam to the mouse — or to the hand cursor once a hand has taken
+    // over (see aim.ts). Both speak the same NDC space, so the conversion below
+    // is unchanged either way.
+    const p = aimNdc(state.pointer)
+    ndcToWorld(p, state.viewport, origin)
+    boxreflect.current.setRay([origin.x, origin.y, 0], [0, 0, 0])
     // Animate rainbow intensity
     const material = rainbow.current.material as RainbowMaterialImpl
     lerp(material, 'emissiveIntensity', isPrismHit ? 2.5 : 0, 0.1)
@@ -116,6 +126,9 @@ export function PrismScene() {
             diamond so it clears the "My Projects" caption over the prism. */}
         <ProjectBox project={getProject('solasphere')} position={[-3, 1, 0]} rotation={[0, 0, Math.PI / 4]} cardOffset={[70, 90]} />
       </Beam>
+      {/* The hand cursor: reticle on the beam's origin, plus the direct-hover
+          pick the beam can't do. Hides itself when the mouse owns the aim. */}
+      <HandCursor />
       {/* Rainbow and flares */}
       <Rainbow ref={rainbow} startRadius={0} endRadius={0.5} fade={0} />
       <Flare ref={flare} visible={isPrismHit} renderOrder={10} scale={1.25} streak={[12.5, 20, 1]} />

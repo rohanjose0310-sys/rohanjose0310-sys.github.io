@@ -12,12 +12,35 @@
 // webcam. We say what it does and that nothing leaves their device *before*
 // the prompt appears, so the prompt confirms a choice they've already made.
 
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import { GESTURE_ROUTES } from './flag'
 import { useHandTracking } from './useHandTracking'
 import { useHandUI } from './store'
 import './handControl.css'
+
+/**
+ * What each route's gestures actually do, shown before the camera prompt.
+ *
+ * Route-keyed because the primer is the *only* instruction a visitor gets, and
+ * the gestures genuinely differ per page — someone invited on /projects being
+ * told how to spin a carousel would be worse than no primer at all.
+ */
+const PRIMER_COPY: Record<string, ReactNode> = {
+  '/projects': (
+    <>
+      Move your hand to aim the beam of light. <b>Pinch</b> to open the project it lands on,
+      make a <b>fist</b> to hold your aim.
+    </>
+  ),
+}
+
+const DEFAULT_PRIMER = (
+  <>
+    Move an open hand to spin the carousel, <b>pinch</b> to enter, make a <b>fist</b> to hold
+    still.
+  </>
+)
 
 export function HandControl() {
   const { start, stop } = useHandTracking()
@@ -79,10 +102,7 @@ export function HandControl() {
     return (
       <div className="hand-control hand-control--primer" role="dialog" aria-label="Hand control">
         <strong>Control with your hand</strong>
-        <p>
-          Move an open hand to spin the carousel, <b>pinch</b> to enter, make a <b>fist</b> to hold
-          still.
-        </p>
+        <p>{PRIMER_COPY[pathname] ?? DEFAULT_PRIMER}</p>
         <p className="hand-control__privacy">
           Uses your webcam, running entirely on your device. No video is recorded, uploaded, or
           seen by anyone — turn it off whenever you like.

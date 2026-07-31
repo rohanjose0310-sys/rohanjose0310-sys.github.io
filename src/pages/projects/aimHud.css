@@ -1,0 +1,82 @@
+/* Hand-aim HUD for the prism scene. Dark chip, like nav-hud — this page is
+   black, so the light home chip would glare. */
+
+.aim-hud {
+  position: fixed;
+  /* Third tier. The stop pill is at 34px and nav-hud at 80px, and on this route
+     nav-hud is showing simultaneously ("peace sign to go back"), so this has to
+     clear both rather than share a row. */
+  bottom: calc(126px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(20, 22, 26, 0.62);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.82);
+  font: 500 12px/1 var(--sans);
+  white-space: nowrap;
+  opacity: 0.4;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+/* Dimmed until a hand is actually in frame, so it reads as "waiting" rather
+   than as a permanent label. */
+.aim-hud.is-live {
+  opacity: 0.9;
+}
+
+.aim-hud b {
+  font-weight: 700;
+  color: #fff;
+}
+
+.aim-hud__title {
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.aim-hud__hint {
+  opacity: 0.6;
+  font-size: 11px;
+}
+
+/* Pinch acceptance. Deliberately visible: the gate takes 90-170ms depending on
+   inference rate, and watching it fill is what turns that from lag into
+   feedback. Mirrors the home HUD's bar, inverted for the dark chip. */
+.aim-hud__pinch {
+  width: 46px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.aim-hud__pinch i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+.aim-hud__pinch.is-pinching {
+  background: rgba(255, 106, 0, 0.2);
+}
+
+/* The site-wide orange dot cursor (index.css) would sit frozen wherever the
+   mouse was left, competing with the in-scene reticle for "which of these is
+   the pointer". Toggled from aim.ts, and only while the hand owns the aim, so
+   touching the mouse brings the real cursor straight back. */
+html.hand-aim body {
+  cursor: none;
+}

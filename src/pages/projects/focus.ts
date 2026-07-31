@@ -1,5 +1,6 @@
 import { proxy } from 'valtio'
 import { useProxy } from 'valtio/utils'
+import { DEBUG } from '../../lib/debug'
 
 // Which project's hover card is showing on /projects. Exactly one, ever.
 //
@@ -21,6 +22,15 @@ import { useProxy } from 'valtio/utils'
 export const focus = proxy({ id: null as string | null })
 export const useFocus = () => useProxy(focus)
 
+// Same debugging affordance gestures/store.ts gives `hand`: aiming is hard to
+// assert on from the outside without it, since the beam has no DOM surface.
+// Dev only.
+// Not `window.focus` — that's a native method, and shadowing it breaks
+// anything that calls it.
+if (DEBUG && typeof window !== 'undefined') {
+  ;(window as unknown as { projectFocus: typeof focus }).projectFocus = focus
+}
+
 const beamClaims = new Map<string, number>() // projectId -> bounce index
 let hoverClaim: string | null = null
 
@@ -34,6 +44,24 @@ export function releaseBeam(id: string) {
 
 export function claimHover(id: string | null) {
   hoverClaim = id
+}
+
+/**
+ * Drop every claim. Call on scene teardown.
+ *
+ * Both claim channels are module singletons, and a beam claim can *only* be
+ * released by `onRayOut` — which needs 3 consecutive misses (Reflect.tsx's
+ * MISS_TOLERANCE) and is never fired on unmount, because the Reflect api is
+ * simply discarded. So without this, aiming at a diamond and opening it leaves
+ * that claim behind forever: on return, the first resolveFocus() picks it up
+ * before a single ray has run, and the page opens with a card already showing
+ * on a diamond nobody is aiming at. The new Reflect has a fresh `hits` map, so
+ * no onRayOut can ever fire for the orphan and it never clears itself.
+ */
+export function resetClaims() {
+  beamClaims.clear()
+  hoverClaim = null
+  focus.id = null
 }
 
 export function resolveFocus() {

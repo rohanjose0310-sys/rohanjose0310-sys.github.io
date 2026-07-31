@@ -20,8 +20,8 @@ export const HANDS_SUPPORTED =
 
 /**
  * Routes where the opt-in invite is offered — the pages with a rich hand
- * interaction worth advertising (home's carousel, about's scroll). Back works
- * on every non-home page once tracking is running (see NavGestures), but a
- * static page isn't worth an invite of its own.
+ * interaction worth advertising (home's carousel, about's scroll, projects'
+ * beam aiming). Back works on every non-home page once tracking is running
+ * (see NavGestures), but a static page isn't worth an invite of its own.
  */
-export const GESTURE_ROUTES = new Set(['/', '/about'])
+export const GESTURE_ROUTES = new Set(['/', '/about', '/projects'])
