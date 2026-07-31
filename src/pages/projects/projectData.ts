@@ -63,6 +63,15 @@ const SOLASPHERE_URLS = [
   '/solasphere12.jpg', // right3 — full installation shot (IMG_3681)
 ]
 
+// Exiled: only 4 real photos exist, so they cycle across the 9
+// GALLERY_LAYOUT slots (i % urls.length in gallery()).
+const EXILED_URLS = [
+  '/Exiled.png',
+  '/Exiled2.png',
+  '/Exiled3.png',
+  '/Exiled4-2.png',
+]
+
 // Dream Parasite: only 5 real photos exist, so they cycle across the 9
 // GALLERY_LAYOUT slots (i % urls.length in gallery()).
 const NOVA_URLS = [
@@ -120,7 +129,7 @@ export const PROJECTS: Project[] = [
       'The room kept her shape long after she stopped filling it. Dust settled around the outline.',
       'From far enough away every window looks like the one from home. This is the use of distance.',
       'Still exiled, and now fluent in it. The word stopped being a verdict somewhere around here.',
-    ]),
+    ], EXILED_URLS),
   },
   {
     id: 'dream-parasite',
