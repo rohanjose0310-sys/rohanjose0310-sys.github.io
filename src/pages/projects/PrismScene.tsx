@@ -125,6 +125,12 @@ export function PrismScene() {
             further left would run it off-screen. Lifted well above the
             diamond so it clears the "My Projects" caption over the prism. */}
         <ProjectBox project={getProject('solasphere')} position={[-3, 1, 0]} rotation={[0, 0, Math.PI / 4]} cardOffset={[70, 90]} />
+        {/* Top-right, mirroring Solasphere: its card is pulled back toward centre. */}
+        <ProjectBox project={getProject('faucon')} position={[3.25, 1.25, 0]} rotation={[0, 0, Math.PI / 4]} cardOffset={[-70, 90]} />
+        {/* Far-left, outside Exiled. */}
+        <ProjectBox project={getProject('tratto')} position={[-5, -0.75, 0]} rotation={[0, 0, Math.PI / 3.5]} cardOffset={[110, 60]} />
+        {/* Far-right diamond, mirroring Exiled on the left. */}
+        <ProjectBox project={getProject('interference')} position={[4.5, -1.75, 0]} rotation={[0, 0, Math.PI / 4]} cardOffset={[-120, 70]} />
       </Beam>
       {/* The hand cursor: reticle on the beam's origin, plus the direct-hover
           pick the beam can't do. Hides itself when the mouse owns the aim. */}

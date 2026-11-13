@@ -46,6 +46,32 @@
   margin: 0;
 }
 
+/* The way into the long-form case study (/projects/:id/story). Like the back
+   link, it is the only part of its line that takes pointer events. */
+.detail-more {
+  display: inline-block;
+  margin-top: 1.4rem;
+  padding: 0.55rem 0.95rem;
+  border: 1px solid rgba(255, 106, 0, 0.55);
+  border-radius: 999px;
+  color: var(--text-h);
+  text-decoration: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(11, 11, 15, 0.55);
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease;
+}
+
+.detail-more:hover {
+  background: var(--accent);
+  color: #0b0b0f;
+}
+
 /* Phones: the frames sit near the middle of a much narrower canvas, so pull
    the block in tight to keep it out of their way. */
 @media (pointer: coarse), (max-width: 800px) {

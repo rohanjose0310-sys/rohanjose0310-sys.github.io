@@ -43,6 +43,11 @@ export function ProjectDetailPage() {
         <p className="detail-meta">
           {project.year} · {project.role}
         </p>
+        {project.story && (
+          <Link to={`/projects/${project.id}/story`} className="detail-more">
+            More information →
+          </Link>
+        )}
       </header>
     </>
   )

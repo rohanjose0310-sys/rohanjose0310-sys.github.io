@@ -14,10 +14,12 @@ import lutTexture from './assets/F-6800-STD.cube?url'
 
 // Scale the orthographic zoom to the viewport: 60 gives breathing room on
 // desktop (the demo's 70 filled the frame edge-to-edge), and narrow screens
-// zoom out further so the caption and boxes fit with negative space.
+// zoom out further so the caption and boxes fit with negative space. The
+// divisor keeps ~6 world units either side of centre, enough for the outer
+// diamonds (Tratto at x -5, Interference at x 4.5) on a 375 px phone.
 function FitZoom() {
   useFrame((state) => {
-    const zoom = Math.min(60, state.size.width / 9.5)
+    const zoom = Math.min(60, state.size.width / 12)
     if (state.camera.zoom !== zoom) {
       state.camera.zoom = zoom
       state.camera.updateProjectionMatrix()

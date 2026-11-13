@@ -1,3 +1,8 @@
+import type { ProjectStory } from './story/types'
+import { INTERFERENCE_STORY } from './stories/interference'
+import { FAUCON_STORY } from './stories/faucon'
+import { TRATTO_STORY } from './stories/tratto'
+
 export interface GalleryImage {
   url: string
   /** The image's own write-up, rendered as the 3D <Text> beside its frame —
@@ -19,6 +24,9 @@ export interface Project {
   year: string
   role: string
   images: GalleryImage[]
+  /** The long-form case study at /projects/:id/story. Projects without one
+   *  hide the gallery's "More information" link. */
+  story?: ProjectStory
 }
 
 // Frame layout ported verbatim from the pmndrs image-gallery demo
@@ -80,6 +88,43 @@ const NOVA_URLS = [
   '/Nova3.png',
   '/Nova4.png',
   '/Nova5.jpeg',
+]
+
+// Interference: one photo per slot, from the DRC's image set.
+const INTERFERENCE_URLS = [
+  '/projects/interference/hero.jpg', // front
+  '/projects/interference/butterfly-macro.jpg', // back-left
+  '/projects/interference/wafer-glove.jpg', // back-right
+  '/projects/interference/final-drawing.jpg', // left1
+  '/projects/interference/render.jpg', // left2
+  '/projects/interference/floor-cast.jpg', // left3
+  '/projects/interference/installed-front.jpg', // right1
+  '/projects/interference/moire-edge.jpg', // right2
+  '/projects/interference/wafer-hand.jpg', // right3
+]
+
+const FAUCON_URLS = [
+  '/projects/faucon/hero.jpg', // front
+  '/projects/faucon/on-tie.jpg', // back-left
+  '/projects/faucon/opening.jpg', // back-right
+  '/projects/faucon/sketches-2.jpg', // left1
+  '/projects/faucon/acrylic-bend.jpg', // left2
+  '/projects/faucon/bend-spanner.jpg', // left3
+  '/projects/faucon/box-closed.jpg', // right1
+  '/projects/faucon/jeans.jpg', // right2
+  '/projects/faucon/box-open.jpg', // right3
+]
+
+const TRATTO_URLS = [
+  '/projects/tratto/set.jpg', // front
+  '/projects/tratto/hero.jpg', // back-left
+  '/projects/tratto/egg-flip.jpg', // back-right
+  '/projects/tratto/drawing-egg-flip.jpg', // left1
+  '/projects/tratto/sanding.jpg', // left2
+  '/projects/tratto/spraying.jpg', // left3
+  '/projects/tratto/ladle-side.jpg', // right1
+  '/projects/tratto/handle-joint.jpg', // right2
+  '/projects/tratto/wood-hand.jpg', // right3
 ]
 
 function gallery(captions: string[], urls: string[] = PLACEHOLDER_URLS): GalleryImage[] {
@@ -150,6 +195,66 @@ export const PROJECTS: Project[] = [
       'One dream fought back and briefly won. The furniture still shows where it happened.',
       'Still feeding, still unnamed. It has outlasted every host who tried to describe it.',
     ], NOVA_URLS),
+  },
+  {
+    id: 'interference',
+    title: 'Interference',
+    image: '/projects/interference/thumb.jpg',
+    tagline: 'A butterfly-patterned silicon wafer inside a tunnel of light.',
+    year: '2026',
+    role: 'Prototyping & Integration · Luminous Litho',
+    images: gallery([
+      'A 300 mm silicon wafer, patterned at D2D, inside a 490 mm tunnel you look into. Nothing moves; the visitor is the mechanism.',
+      'Butterfly wings and silicon make colour the same way: interference in structures close to the wavelength of light.',
+      'A test wafer in the hand. Thom van Os and Maria Niño patterned these to learn what the process could draw.',
+      'The final drawing: one butterfly and 68 stars across a 12-inch wafer, with a smallest feature of 2 µm.',
+      'My Fusion 360 model of the slotted screen and curled RGB backing, spaced for a 1.6 m viewing distance.',
+      'The light lands the butterflies on the black paper floor. Reach in and they land on your hand.',
+      'Installed in the D2D foyer. The tunnel, stand, screen and integration were my part of the team’s work.',
+      'Behind the wafer, 93 slots cut as one continuous laser line turn RGB stripes into moving bands.',
+      'Writing with light on silicon, made where it is shown.',
+    ], INTERFERENCE_URLS),
+    story: INTERFERENCE_STORY,
+  },
+  {
+    id: 'faucon',
+    title: 'Le faucon pèlerin',
+    image: '/projects/faucon/thumb.jpg',
+    tagline: 'A stainless-steel bottle opener that clips to your tie.',
+    year: '2026',
+    role: 'Product Design & Fabrication',
+    images: gallery([
+      'Le faucon pèlerin, the peregrine falcon: a bottle opener that doubles as a tie clip, in polished stainless steel.',
+      'Speed-form was the starting point: liquid metal, soft and elegantly curved corners.',
+      'The wings become the pivot and fulcrum, borrowed from the geometry of a Swiss Army knife.',
+      'Early sketches of swept silhouettes, before the opener stood up on its edge.',
+      'Acrylic test clips, heat-bent by hand to find three angles that grip without snapping.',
+      'The final steel, bent with a spanner and hammered to stretch the wing into a softer curve.',
+      'A two-piece plywood box wrapped in black card, the name hand-written in silver.',
+      'Opener and clip, worn on whatever you’re wearing.',
+      'Inside: the falcon on a folded tie, and a hand-written letter describing the bird.',
+    ], FAUCON_URLS),
+    story: FAUCON_STORY,
+  },
+  {
+    id: 'tratto',
+    title: 'Tratto',
+    image: '/projects/tratto/thumb.jpg',
+    tagline: 'Three kitchen tools for Alessi, after the Colombina cutlery.',
+    year: '2026',
+    role: 'Product Design & Fabrication · Alessi concept',
+    images: gallery([
+      'Tratto, “stroke”: a wooden spatula, an egg flip and a ladle, designed as one family for Alessi.',
+      'Huon pine, cut so the dark grain line wraps around the head and flows into the handle.',
+      'The egg flip: the Colombina fork’s silhouette with the prongs taken away. Subtracting is more elegant.',
+      'Plan drawings in first-angle projection, 1:1 on A3, drawn in Fusion.',
+      'Shaping the spatula from a single block, refined by hand to 320 grit.',
+      'The ladle’s printed bowl, primed, filled and sanded until no print line remained.',
+      'A perfect circle: the one shape in the set with no echo of the others.',
+      'Epoxy mixed with Huon pine sawdust, sanded back to a flush seam of steel and timber.',
+      'Same handle, same flare. Three materials, one family.',
+    ], TRATTO_URLS),
+    story: TRATTO_STORY,
   },
 ]
 

@@ -26,12 +26,13 @@ import { hand } from '../../gestures/store'
  * This one has to be derived rather than felt, because the page has a hard
  * reachability requirement. The beam runs cursor -> world origin, so to light a
  * diamond the cursor must sit *beyond* it on the ray from the origin through
- * it. The furthest diamond is dream-parasite at world (2.25, -3.5), |d| = 4.16;
+ * it. The lowest diamond is dream-parasite at world (2.25, -3.5), |d| = 4.16 (the
+ * outer Tratto and Interference diamonds sit near y = -1, well inside ndcY);
  * clearing its hitbox (a unit box under scale={0.5}, rotated 45°, so a
  * half-diagonal of ~0.354) needs t >= 1.085, and at t = 1.1 the cursor sits at
  * world (2.48, -3.85).
  *
- * FitZoom pins zoom at 60 on any window wider than ~570px, so viewport.height
+ * FitZoom pins zoom at 60 on any window wider than 720px, so viewport.height
  * is height/60 — on a 700px-tall window (a laptop with browser chrome, the
  * realistic worst case) that is 11.67 world units, half-height 5.83. So the
  * cursor must reach ndcY = -3.85 / 5.83 = -0.66. Solving -0.66 = (0.5 - y) * 2 * GAIN:
