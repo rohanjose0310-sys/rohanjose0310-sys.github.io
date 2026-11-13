@@ -14,7 +14,19 @@ export function useLenis(enabled = true) {
 
     const lenis = new Lenis()
 
+    // Lenis only re-measures when <html> itself resizes, and index.css pins
+    // html/body/#root to height: 100% — so a page that grows after Lenis
+    // measured (a long DOM page like /projects/:id/story, reached from a
+    // fixed-canvas page) keeps a scroll limit of 0 and swallows the wheel,
+    // leaving only the scrollbar working. Re-measure when the real document
+    // height changes.
+    let lastHeight = document.documentElement.scrollHeight
     const update = (time: number) => {
+      const height = document.documentElement.scrollHeight
+      if (height !== lastHeight) {
+        lastHeight = height
+        lenis.resize()
+      }
       lenis.raf(time * 1000) // gsap ticker time is seconds; lenis wants ms
     }
     gsap.ticker.add(update)
